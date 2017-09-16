@@ -26,12 +26,15 @@ module.exports.loop = function () {
     });  
     if(towers.length) {
         tower = towers[0];
-        var closestDamagedStructure = tower.pos.findClosestByRange(FIND_STRUCTURES, {
+        var damagedStructure = tower.room.find(FIND_STRUCTURES, {
             filter: (structure) => structure.hits < structure.hitsMax &&
                 structure.hits < 150000
         });
-        if(closestDamagedStructure) {
-            tower.repair(closestDamagedStructure);
+        
+        damagedStructure.sort((s1, s2) => s1.hits - s2.hits);
+        
+        if(damagedStructure.length != 0) {
+            tower.repair(damagedStructure[0]);
         }
 
         var closestHostile = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS);

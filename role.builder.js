@@ -45,7 +45,7 @@ var roleBuilder = {
 	       }
 	    }
 	    else {
-	        var ground =  creep.pos.findClosestByPath(FIND_DROPPED_ENERGY);
+	        var ground =  creep.pos.findClosestByPath(FIND_DROPPED_RESOURCES);
             if (ground) {
                 if (creep.pickup(ground) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(ground, {visualizePathStyle: {stroke: '#ffaa00'}});

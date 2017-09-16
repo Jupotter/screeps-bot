@@ -30,8 +30,8 @@ var roleHauler = {
         
         if (creep.memory.harvest) {
             var ground;
-            ground =  source.pos.findClosestByPath(FIND_DROPPED_ENERGY);
-            if (ground) {
+            ground =  source.pos.findClosestByPath(FIND_DROPPED_RESOURCES);
+            if (ground && ground.amount > 50) {
                 if (creep.pickup(ground) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(ground, {visualizePathStyle: {stroke: '#ffaa00'}});
                 }
@@ -42,7 +42,6 @@ var roleHauler = {
                             return structure.structureType == STRUCTURE_CONTAINER;
                         }
                 });
-                
                 creep.memory.orig = container;
                 if(creep.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(container, {visualizePathStyle: {stroke: '#ffaa00'}});
