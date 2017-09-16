@@ -13,6 +13,9 @@ var roleHauler = {
     
     /** @param {Creep} creep **/
     run: function(creep, source) {
+        if (!source) {
+            source = Game.spawns['Spawn1']
+        }
         var tick = creep.memory.tick;
         if (!tick) {
             tick = 1;
@@ -56,7 +59,7 @@ var roleHauler = {
                                 ((
                                     structure.structureType == STRUCTURE_SPAWN ||
                                     structure.structureType == STRUCTURE_TOWER
-                                ) && structure.energy <= structure.energyCapacity - 50)
+                                ) && structure.energy <= structure.energyCapacity - 100)
                             );
                     }
             });
@@ -64,7 +67,7 @@ var roleHauler = {
                 targets = creep.room.find(FIND_STRUCTURES, {
                         filter: (structure) => {
                             return structure.structureType == STRUCTURE_CONTAINER && 
-                                      structure.id != creep.memory.orig.id && 
+                                      (!creep.memory.orig || structure.id != creep.memory.orig.id) && 
                                       structure.store[RESOURCE_ENERGY] < structure.storeCapacity - creep.carryCapacity;
                         }
                 });

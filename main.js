@@ -2,12 +2,32 @@ var roleHarvester = require('role.harvester');
 var roleUpgrader = require('role.upgrader');
 var roleBuilder = require('role.builder');
 var roleHauler = require('role.hauler');
+var utils = require('utils');
+
 
 var roles = {
     harvester: roleHarvester,
     upgrader: roleUpgrader,
     builder: roleBuilder,
     hauler: roleHauler
+}
+
+    /** @param {Creep} creep **/
+var recycle = function (creep, spawn) {
+    creep.memory.role = 'recycle';
+    creep.drop(RESOURCE_ENERGY, creep.carry);
+    var container = spawn.pos.findClosestByRange(FIND_STRUCTURES, {
+        filter: (structure) => {
+                return structure.structureType == STRUCTURE_CONTAINER 
+            }
+    });
+    if (!container) {
+        console.log("no recycle container found");
+        return;
+    }
+    if (spawn.recycleCreep(creep) == ERR_NOT_IN_RANGE) {
+        creep.moveTo(container, {visualizePathStyle: {stroke: '#ff0000'}});
+    }
 }
 
 module.exports.loop = function () {
@@ -19,7 +39,9 @@ module.exports.loop = function () {
     }
     
     var sources = Game.spawns['Spawn1'].room.find(FIND_SOURCES);
-    var sites = Game.spawns['Spawn1'].room.find(FIND_CONSTRUCTION_SITES);
+    var sites = Game.spawns['Spawn1'].room.find(FIND_CONSTRUCTION_SITES, {
+        filter: (s) => s.structureType != STRUCTURE_ROAD
+    });
 
     var towers = Game.spawns['Spawn1'].room.find(FIND_STRUCTURES, {
             filter: (structure) => structure.structureType == STRUCTURE_TOWER
@@ -53,7 +75,7 @@ module.exports.loop = function () {
         roleUpgrader.spawn(Game.spawns['Spawn1']);
     }
     var hauler = _.filter(Game.creeps, (creep) => creep.memory.role == 'hauler');
-    if(hauler.length < sources.length) {
+    if(hauler.length < sources.length + 1) {
         roleHauler.spawn(Game.spawns['Spawn1'], hauler.length == 0);
     }
     var harvesters = _.filter(Game.creeps, (creep) => creep.memory.role == 'harvester');
@@ -74,6 +96,9 @@ module.exports.loop = function () {
     var h = 0;
     for(var name in Game.creeps) {
         var creep = Game.creeps[name];
+        if (creep.ticksToLive <= 50) {
+            recycle(creep, Game.spawns['Spawn1']);
+        }
         if(creep.memory.role == 'harvester') {
             roleHarvester.run(creep, sources[s++]);
         }
