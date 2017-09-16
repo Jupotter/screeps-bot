@@ -31,8 +31,8 @@ var roleBuilder = {
 
 	    if(creep.memory.building) {
 	       for (var i in order) {
-	           struct = order[i];
-	           target = creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES, { 
+	           var struct = order[i];
+	           var target = creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES, { 
 	           filter: function(a) {
 	               return a.structureType == struct;
 	           }});
