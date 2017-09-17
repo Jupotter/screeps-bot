@@ -16,6 +16,7 @@ var roleBuilder = {
             STRUCTURE_TOWER,
             STRUCTURE_EXTENSION,
             STRUCTURE_CONTAINER,
+            STRUCTURE_STORAGE,
             STRUCTURE_ROAD,
             STRUCTURE_RAMPART,
             STRUCTURE_WALL];
@@ -45,7 +46,8 @@ var roleBuilder = {
 	       }
 	    }
 	    else {
-	        var ground =  creep.pos.findClosestByPath(FIND_DROPPED_RESOURCES);
+	        var ground; 
+	        // ground =  creep.pos.findClosestByPath(FIND_DROPPED_RESOURCES);
             if (ground) {
                 if (creep.pickup(ground) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(ground, {visualizePathStyle: {stroke: '#ffaa00'}});

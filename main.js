@@ -39,6 +39,7 @@ module.exports.loop = function () {
     }
     
     var sources = Game.spawns['Spawn1'].room.find(FIND_SOURCES);
+    var hostile = Game.spawns['Spawn1'].room.find(FIND_HOSTILE_CREEPS);
     var sites = Game.spawns['Spawn1'].room.find(FIND_CONSTRUCTION_SITES, {
         filter: (s) => s.structureType != STRUCTURE_ROAD
     });
@@ -47,27 +48,27 @@ module.exports.loop = function () {
             filter: (structure) => structure.structureType == STRUCTURE_TOWER
     });  
     if(towers.length) {
-        tower = towers[0];
-        var damagedStructure = tower.room.find(FIND_STRUCTURES, {
-            filter: (structure) => structure.hits < structure.hitsMax &&
-                structure.hits < 150000
-        });
-        
-        damagedStructure.sort((s1, s2) => s1.hits - s2.hits);
-        
-        if(damagedStructure.length != 0) {
-            tower.repair(damagedStructure[0]);
-        }
-
-        var closestHostile = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
-        if(closestHostile) {
-            tower.attack(closestHostile);
+        var tower = towers[0];
+        if (hostile.length == 0) {
+            var damagedStructure = tower.room.find(FIND_STRUCTURES, {
+                filter: (structure) => structure.hits < structure.hitsMax &&
+                    structure.hits < 150000
+            });
+            
+            damagedStructure.sort((s1, s2) => s1.hits - s2.hits);
+            
+            if(damagedStructure.length != 0) {
+                tower.repair(damagedStructure[0]);
+            }
+        } else {
+            hostile.sort(utils.sortDistance(tower));
+            tower.attack(hostile[0]);
         }
     }
     
     
     var builders = _.filter(Game.creeps, (creep) => creep.memory.role == 'builder');
-    if(builders.length < sites.length / 6) {
+    if(builders.length < (sites.length + 1) / 5) {
         roleBuilder.spawn(Game.spawns['Spawn1']);
     }
     var upgrader = _.filter(Game.creeps, (creep) => creep.memory.role == 'upgrader');
