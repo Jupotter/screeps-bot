@@ -19,7 +19,8 @@ var roleHarvester = {
     },
     
     /** @param {Creep} creep **/
-    run: function(creep, source) {
+    run: function(creep) {
+        var source = Game.getObjectById(creep.memory.source);
         if(creep.carry.energy == 0) {
 	        creep.memory.harvest = true;
             if (source.energy == 0) {

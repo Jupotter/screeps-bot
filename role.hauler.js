@@ -15,6 +15,8 @@ var roleHauler = {
     run: function(creep, source) {
         if (!source) {
             source = Game.spawns['Spawn1']
+        } else {
+            source = Game.getObjectById(source.id);
         }
         var tick = creep.memory.tick;
         if (!tick) {

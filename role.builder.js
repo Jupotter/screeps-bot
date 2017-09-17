@@ -15,10 +15,10 @@ var roleBuilder = {
         var order = [
             STRUCTURE_TOWER,
             STRUCTURE_EXTENSION,
-            STRUCTURE_CONTAINER,
-            STRUCTURE_STORAGE,
-            STRUCTURE_ROAD,
             STRUCTURE_RAMPART,
+            STRUCTURE_CONTAINER,
+            //STRUCTURE_STORAGE,
+            STRUCTURE_ROAD,
             STRUCTURE_WALL];
 
 	    if(creep.memory.building && creep.carry.energy == 0) {
@@ -38,7 +38,9 @@ var roleBuilder = {
 	               return a.structureType == struct;
 	           }});
 	           if (target) {
-	               if(creep.build(target) == ERR_NOT_IN_RANGE) {
+	               var result = creep.build(target);
+	               console.log(result);
+	               if(result == ERR_NOT_IN_RANGE) {
                         creep.moveTo(target, {visualizePathStyle: {stroke: '#ffffff'}});
                     }
                     break;

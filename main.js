@@ -15,18 +15,21 @@ var roles = {
     /** @param {Creep} creep **/
 var recycle = function (creep, spawn) {
     creep.memory.role = 'recycle';
-    creep.drop(RESOURCE_ENERGY, creep.carry);
-    var container = spawn.pos.findClosestByRange(FIND_STRUCTURES, {
-        filter: (structure) => {
-                return structure.structureType == STRUCTURE_CONTAINER 
-            }
-    });
-    if (!container) {
-        console.log("no recycle container found");
-        return;
-    }
-    if (spawn.recycleCreep(creep) == ERR_NOT_IN_RANGE) {
-        creep.moveTo(container, {visualizePathStyle: {stroke: '#ff0000'}});
+    if (creep.carry > 0) {
+        creep.drop(RESOURCE_ENERGY, creep.carry);
+    } else {
+        var container = spawn.pos.findClosestByRange(FIND_STRUCTURES, {
+            filter: (structure) => {
+                    return structure.structureType == STRUCTURE_CONTAINER 
+                }
+        });
+        if (!container) {
+            console.log("no recycle container found");
+            container = spawn;
+        }
+        if (spawn.recycleCreep(creep) == ERR_NOT_IN_RANGE) {
+            creep.moveTo(container, {visualizePathStyle: {stroke: '#ff0000'}});
+        }
     }
 }
 
@@ -37,8 +40,15 @@ module.exports.loop = function () {
             console.log('Clearing non-existing creep memory:', name);
         }
     }
+    var room = Game.spawns['Spawn1'].room;
+    var sources
+    if (!room.memory.sources) {
+        sources = room.find(FIND_SOURCES);
+        room.memory.sources = sources;
+    } else {
+        sources = room.memory.sources;
+    }
     
-    var sources = Game.spawns['Spawn1'].room.find(FIND_SOURCES);
     var hostile = Game.spawns['Spawn1'].room.find(FIND_HOSTILE_CREEPS);
     var sites = Game.spawns['Spawn1'].room.find(FIND_CONSTRUCTION_SITES, {
         filter: (s) => s.structureType != STRUCTURE_ROAD
@@ -101,7 +111,21 @@ module.exports.loop = function () {
             recycle(creep, Game.spawns['Spawn1']);
         }
         if(creep.memory.role == 'harvester') {
-            roleHarvester.run(creep, sources[s++]);
+            if (!creep.memory.source) {
+                for (var i in sources) {
+                    source = sources[i];
+                    if (!source.creep || !Game.creeps[source.creep] ||  Memory.creeps[source.creep].role != 'harvester') {
+                        source.creep = creep.name;
+                        creep.memory.source = source.id;
+                        break;
+                    }
+                }
+            }
+            if (creep.memory.source) {
+                roleHarvester.run(creep);
+            } else {
+                recycle(creep, Game.spawns['Spawn1']);
+            }
         }
         if(creep.memory.role == 'upgrader') {
             roleUpgrader.run(creep);
@@ -113,4 +137,5 @@ module.exports.loop = function () {
             roleHauler.run(creep, sources[h++]);
         }
     }
+    room.memory.sources = sources
 }
