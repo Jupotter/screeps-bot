@@ -33,22 +33,28 @@ var utils = {
         return cost;
     },
     
-    buildBody: function(spawn, base) {
+    buildBody: function(spawn, base, first, limit = 0) {
         var that = this;
         var capacity = spawn.room.energyAvailable;
-        var body = base;
+        var body = base.slice();
+        if (first) {
+            body.push(first);
+        }
         var cost = that.bodyCost(base);
         var added = false;
         do {
             added = false;
             for (var i in base) {
                 var part = base[i];
-                console.log(part)
+                //console.log(part);
                 if (cost + BODYPART_COST[part] <= capacity) {
                     body.push(part);
                     cost += BODYPART_COST[part];
-                    console.log(cost)
                     added = true;
+                }
+                if (limit != 0 && body.length >= limit) {
+                    added = false;
+                    break;
                 }
             }
         } while (added && cost < capacity)

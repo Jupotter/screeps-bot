@@ -4,8 +4,7 @@ var roleBuilder = require('role.builder');
 var roleHarvester = {
     //** @param {Spawn} spawn **/
     spawn: function(spawn, force = false) {
-        var body = utils.buildBody(spawn, [WORK,WORK]);
-        body[0] = MOVE;
+        var body = utils.buildBody(spawn, [WORK], MOVE, 6);
         if (force || spawn.room.energyAvailable >= spawn.room.energyCapacityAvailable * 0.75) {
             spawn.createCreep(body, undefined, {role: 'harvester'});
         }
