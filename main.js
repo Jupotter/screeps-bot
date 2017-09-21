@@ -112,27 +112,27 @@ module.exports.loop = function () {
     
     var claimers = _.filter(Game.creeps, (creep) => creep.memory.role == 'claimer');
     if(claimers.length < remoteRooms.length) {
-        roleClaimer.spawn(spawn);
+        roleClaimer.spawn(spawn, false, {ownRoom: room});
     }
     var remoteHarvesters = _.filter(Game.creeps, (creep) => creep.memory.role == 'remoteHarvester');
     if(remoteHarvesters.length < remoteRooms.length) {
-        roleRemoteHarvester.spawn(spawn);
+        roleRemoteHarvester.spawn(spawn, false, {ownRoom: room});
     }
     var builders = _.filter(Game.creeps, (creep) => creep.memory.role == 'builder');
     if(builders.length < (sites.length + 1) / 5) {
-        roleBuilder.spawn(spawn);
+        roleBuilder.spawn(spawn, false, {ownRoom: room});
     }
     var upgrader = _.filter(Game.creeps, (creep) => creep.memory.role == 'upgrader');
     if(upgrader.length < 1) {
-        roleUpgrader.spawn(spawn);
+        roleUpgrader.spawn(spawn, false, {ownRoom: room});
     }
     var hauler = _.filter(Game.creeps, (creep) => creep.memory.role == 'hauler');
     if(hauler.length < sources.length + 1) {
-        roleHauler.spawn(spawn, hauler.length == 0);
+        roleHauler.spawn(spawn, hauler.length == 0, {ownRoom: room});
     }
     var harvesters = _.filter(Game.creeps, (creep) => creep.memory.role == 'harvester');
     if(harvesters.length < sources.length) {
-        roleHarvester.spawn(spawn, harvesters.length == 0);
+        roleHarvester.spawn(spawn, harvesters.length == 0, {ownRoom: room});
     }
     
     if(spawn.spawning) { 
