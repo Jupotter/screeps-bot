@@ -20,13 +20,13 @@ var roleBuilder = {
             creep.memory.ownRoom = creep.room.name;
         }
         var order = [
-            STRUCTURE_SPAWN,
             STRUCTURE_TOWER,
             STRUCTURE_EXTENSION,
             STRUCTURE_RAMPART,
             STRUCTURE_CONTAINER,
             STRUCTURE_ROAD,
             STRUCTURE_STORAGE,
+            STRUCTURE_SPAWN,
             STRUCTURE_LINK,
             STRUCTURE_WALL];
 
