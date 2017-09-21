@@ -18,8 +18,8 @@ var roleRemoteHarvester = {
     
     /** @param {Creep} creep **/
     run: function(creep) {
-        var source = creep.memory.source
-        var room = creep.memory.room
+        var source = creep.memory.source;
+        var room = creep.memory.room;
         if (source) {
             source = Game.getObjectById(source);
             if(creep.carry.energy == 0) {

@@ -59,7 +59,7 @@ var roleHauler = {
                                         structure.store[RESOURCE_ENERGY] > 50;
                             } else {
                                 return structure.structureType == STRUCTURE_CONTAINER ||
-                                       structure.structureType == STRUCTURE_STORAGE
+                                       structure.structureType == STRUCTURE_STORAGE;
                             }
                         }
                     });
@@ -95,7 +95,7 @@ var roleHauler = {
                 });
             }
             
-            targets.sort(utils.sortDistance(creep))
+            targets.sort(utils.sortDistance(creep));
             
             if(targets.length > 0) {
                 if(creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {

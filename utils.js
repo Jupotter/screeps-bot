@@ -9,11 +9,11 @@ var utils = {
         return function(a, b) {
            var dist = that.distance(creep, a) - that.distance(creep, b);
            return dist;
-        }
+        };
     },
     
     findSources(creep) {
-        var that = this
+        var that = this;
         var sources = creep.room.find(FIND_SOURCES);
         
         sources.sort(
@@ -57,9 +57,18 @@ var utils = {
                     break;
                 }
             }
-        } while (added && cost < capacity)
+        } while (added && cost < capacity);
         return body;
+    },
+
+    clearMemory: function () {
+        for(var name in Memory.creeps) {
+            if(!Game.creeps[name]) {
+                delete Memory.creeps[name];
+                console.log('Clearing non-existing creep memory:', name);
+            }
+        }
     }
-}
+};
 
 module.exports = utils;

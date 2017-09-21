@@ -16,7 +16,7 @@ var roleClaimer = {
         var room = creep.memory.room;
         controller = creep.memory.controller;
         if (controller) {
-            controller = creep.room.controller
+            controller = creep.room.controller;
             var result = creep.reserveController(controller);
             if(result == ERR_NOT_IN_RANGE) {
                 creep.moveTo(creep.room.controller, {visualizePathStyle: {stroke: '#00ff00'}});
@@ -29,6 +29,6 @@ var roleClaimer = {
             creep.moveTo(creep.room.controller, {visualizePathStyle: {stroke: '#00ff00'}});
         }
     }
-}
+};
 
 module.exports = roleClaimer;

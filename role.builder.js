@@ -1,5 +1,4 @@
 var utils = require('utils');
-var roleUpgrader = require('role.upgrader');
 
 var roleBuilder = {
     //** @param {Spawn} spawn **/
@@ -59,8 +58,8 @@ var roleBuilder = {
             } else {
 	        var container = Game.spawns['Spawn1'].pos.findClosestByPath(FIND_STRUCTURES, {
                 filter: (structure) => {
-                        return (structure.structureType == STRUCTURE_CONTAINER || structure.structureType == STRUCTURE_STORAGE)
-                            && structure.store[RESOURCE_ENERGY] > 0;
+                        return (structure.structureType == STRUCTURE_CONTAINER || structure.structureType == STRUCTURE_STORAGE) &&
+                            structure.store[RESOURCE_ENERGY] > 0;
                     }
             });
             if (container) {
