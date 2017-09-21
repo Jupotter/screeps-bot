@@ -1,7 +1,10 @@
 var utils = require('utils');
 
 var roleRemoteHarvester = {
-    /** @param {Spawn} spawn **/
+
+    /** @param {Spawn} spawn
+     *  @param {boolean} force
+     *  @param {Object} memory **/
     spawn: function(spawn, force = false, memory = {}) {
         var body = utils.buildBody(spawn, [WORK,CARRY,MOVE], null, 15);
         memory.role = 'remoteHarvester';

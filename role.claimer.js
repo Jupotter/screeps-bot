@@ -2,7 +2,9 @@ var utils = require('utils');
 
 var roleClaimer = {
 
-    /** @param {Spawn} spawn **/
+    /** @param {Spawn} spawn
+     *  @param {boolean} force
+     *  @param {Object} memory **/
     spawn: function(spawn, force = false, memory = {}) {
         var body = [CLAIM, CLAIM, MOVE, MOVE];
         memory.role = 'claimer';

@@ -3,8 +3,10 @@ var roleHarvester = require('role.harvester');
 
 var roleHauler = {
     doNotFill : [],
-    
-    /** @param {Spawn} spawn **/
+
+    /** @param {Spawn} spawn
+     *  @param {boolean} force
+     *  @param {Object} memory **/
     spawn: function(spawn, force = false, memory = {}) {
         var body = utils.buildBody(spawn, [MOVE,CARRY]);
         memory.role = 'hauler';

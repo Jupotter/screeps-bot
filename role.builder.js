@@ -2,7 +2,9 @@ var utils = require('utils');
 var roleUpgrader = require('role.upgrader');
 
 var roleBuilder = {
-    /** @param {Spawn} spawn **/
+    /** @param {Spawn} spawn
+     *  @param {boolean} force
+     *  @param {Object} memory **/
     spawn: function(spawn, force = false, memory = {}) {
         var body = utils.buildBody(spawn, [WORK,CARRY,MOVE], null, 20);
         memory.role = 'builder';
