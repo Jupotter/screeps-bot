@@ -2,10 +2,11 @@ var utils = require('utils');
 
 var roleRemoteHarvester = {
     /** @param {Spawn} spawn **/
-    spawn: function(spawn, force = false) {
+    spawn: function(spawn, force = false, memory = {}) {
         var body = utils.buildBody(spawn, [WORK,CARRY,MOVE], null, 15);
+        memory.role = 'remoteHarvester';
         if (force || spawn.room.energyAvailable >= spawn.room.energyCapacityAvailable * 0.75) {
-            spawn.createCreep(body, undefined, {role: 'remoteHarvester'});
+            spawn.createCreep(body, undefined, memory);
         }
         return body;
     },

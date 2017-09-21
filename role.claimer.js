@@ -3,10 +3,11 @@ var utils = require('utils');
 var roleClaimer = {
 
     /** @param {Spawn} spawn **/
-    spawn: function(spawn, force = false) {
+    spawn: function(spawn, force = false, memory = {}) {
         var body = [CLAIM, CLAIM, MOVE, MOVE];
+        memory.role = 'claimer';
         if (force || spawn.room.energyAvailable >= spawn.room.energyCapacityAvailable * 0.75) {
-            spawn.createCreep(body, undefined, {role: 'claimer'});
+            spawn.createCreep(body, undefined, memory);
         }
         return body;
     },

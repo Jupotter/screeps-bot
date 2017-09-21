@@ -14,7 +14,7 @@ var roles = {
     hauler: roleHauler
 };
 
-var remoteRooms = ['E25N42'];
+var remoteRooms = [];
 
     /** @param {Creep} creep **/
 var recycle = function (creep, spawn) {

@@ -5,10 +5,11 @@ var roleHauler = {
     doNotFill : [],
     
     /** @param {Spawn} spawn **/
-    spawn: function(spawn, force = false) {
+    spawn: function(spawn, force = false, memory = {}) {
         var body = utils.buildBody(spawn, [MOVE,CARRY]);
+        memory.role = 'hauler';
         if (force || spawn.room.energyAvailable >= spawn.room.energyCapacityAvailable * 0.75) {
-            spawn.createCreep(body, undefined, {role: 'hauler'});
+            spawn.createCreep(body, undefined, memory);
         }
         return body;
     },

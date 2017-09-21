@@ -2,10 +2,11 @@ var utils = require('utils');
 
 var roleUpgrader = {
     /** @param {Spawn} spawn **/
-    spawn: function(spawn, force = false) {
+    spawn: function(spawn, force = false, memory = {}) {
         var body = utils.buildBody(spawn, [WORK,CARRY,MOVE], null, 20);
+        memory.role = 'upgrader';
         if (force || spawn.room.energyAvailable >= spawn.room.energyCapacityAvailable * 0.75) {
-            spawn.createCreep(body, undefined, {role: 'upgrader'});
+            spawn.createCreep(body, undefined, memory);
         }
         return body;
     },
