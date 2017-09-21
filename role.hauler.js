@@ -4,7 +4,7 @@ var roleHarvester = require('role.harvester');
 var roleHauler = {
     doNotFill : [],
     
-    //** @param {Spawn} spawn **/
+    /** @param {Spawn} spawn **/
     spawn: function(spawn, force = false) {
         var body = utils.buildBody(spawn, [MOVE,CARRY]);
         if (force || spawn.room.energyAvailable >= spawn.room.energyCapacityAvailable * 0.75) {

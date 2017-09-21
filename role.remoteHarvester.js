@@ -1,19 +1,13 @@
 var utils = require('utils');
 
 var roleRemoteHarvester = {
-    //** @param {Spawn} spawn **/
+    /** @param {Spawn} spawn **/
     spawn: function(spawn, force = false) {
         var body = utils.buildBody(spawn, [WORK,CARRY,MOVE], null, 15);
         if (force || spawn.room.energyAvailable >= spawn.room.energyCapacityAvailable * 0.75) {
             spawn.createCreep(body, undefined, {role: 'remoteHarvester'});
         }
         return body;
-    },
-    
-    distance: function(a, b) {
-        var dist = (b.pos.x - a.pos.x)*(b.pos.x - a.pos.x) + (b.pos.y - a.pos.y)*(b.pos.y - a.pos.y);
-        console.log(dist);
-        return dist;
     },
     
     /** @param {Creep} creep **/

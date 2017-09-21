@@ -2,7 +2,7 @@ var utils = require('utils');
 
 var roleClaimer = {
 
-    //** @param {Spawn} spawn **/
+    /** @param {Spawn} spawn **/
     spawn: function(spawn, force = false) {
         var body = [CLAIM, CLAIM, MOVE, MOVE];
         if (force || spawn.room.energyAvailable >= spawn.room.energyCapacityAvailable * 0.75) {
@@ -17,9 +17,11 @@ var roleClaimer = {
         controller = creep.memory.controller;
         if (controller) {
             controller = creep.room.controller;
-            var result = creep.reserveController(controller);
-            if(result == ERR_NOT_IN_RANGE) {
-                creep.moveTo(creep.room.controller, {visualizePathStyle: {stroke: '#00ff00'}});
+            if (creep.claimController(controller) == ERR_GCL_NOT_ENOUGH) {
+                var result = creep.reserveController(controller);
+                if(result == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(creep.room.controller, {visualizePathStyle: {stroke: '#00ff00'}});
+                }
             }
         } else if (creep.room.name != room) {
             var exit = Game.map.findExit(creep.room, room);

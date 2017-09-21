@@ -1,7 +1,8 @@
 var utils = require('utils');
+var roleUpgrader = require('role.upgrader');
 
 var roleBuilder = {
-    //** @param {Spawn} spawn **/
+    /** @param {Spawn} spawn **/
     spawn: function(spawn, force = false) {
         var body = utils.buildBody(spawn, [WORK,CARRY,MOVE], null, 20);
         if (force || spawn.room.energyAvailable >= spawn.room.energyCapacityAvailable * 0.75) {
@@ -12,7 +13,11 @@ var roleBuilder = {
     
     /** @param {Creep} creep **/
     run: function(creep) {
+        if (!creep.memory.ownRoom) {
+            creep.memory.ownRoom = creep.room.name;
+        }
         var order = [
+            STRUCTURE_SPAWN,
             STRUCTURE_TOWER,
             STRUCTURE_EXTENSION,
             STRUCTURE_RAMPART,
@@ -31,50 +36,81 @@ var roleBuilder = {
 	        creep.say('🚧 build');
 	    }
 
+        var target;
 	    if(creep.memory.building) {
-	       for (var i in order) {
-	           var struct = order[i];
-	           var target = creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES, { 
-	           filter: function(a) {
-	               return a.structureType == struct;
-	           }});
-	           if (target) {
-	               var result = creep.build(target);
-	               if(result == ERR_NOT_IN_RANGE) {
-                        creep.moveTo(target, {visualizePathStyle: {stroke: '#ffffff'}});
-                    }
+            for (var i in order) {
+                var struct = order[i];
+                target = creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES, {
+                /* jshint -W083 */
+                filter: function(a) {
+                    return a.structureType == struct;
+                }});
+                if (target) {
                     break;
-	           } else {
-	           }
-	       }
+                }
+            }
+            if (!target) {
+                for (var room in Game.rooms) {
+                    if (room == creep.room.name) {
+                        continue;
+                    }
+                    room = Game.rooms[room];
+                    for (var i in order) {
+                        var struct = order[i];
+                        var targets = room.find(FIND_CONSTRUCTION_SITES, {
+                        /* jshint -W083 */
+                        filter: function(a) {
+                            return a.structureType == struct;
+                        }});
+                        if (targets.length > 0) {
+                            target = targets[0]
+                            break;
+                        }
+                    }
+                }
+            }
+           
+            if (target) {
+                var result = creep.build(target);
+                if(result == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(target, {visualizePathStyle: {stroke: '#ffffff'}});
+                }
+            } else {
+                roleUpgrader.run(creep);
+            }
 	    }
 	    else {
-	        var ground; 
-	        // ground =  creep.pos.findClosestByPath(FIND_DROPPED_RESOURCES);
-            if (ground) {
-                if (creep.pickup(ground) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(ground, {visualizePathStyle: {stroke: '#ffaa00'}});
-                }
+            if (creep.room.name != creep.memory.ownRoom) {
+                var exit = Game.map.findExit(creep.room, creep.memory.ownRoom);
+                creep.moveTo(creep.room.find(exit)[0], { visualizePathStyle: { stroke: '#00ff00' } });
             } else {
-	        var container = Game.spawns['Spawn1'].pos.findClosestByPath(FIND_STRUCTURES, {
-                filter: (structure) => {
-                        return (structure.structureType == STRUCTURE_CONTAINER || structure.structureType == STRUCTURE_STORAGE) &&
-                            structure.store[RESOURCE_ENERGY] > 0;
+                var ground;
+                // ground =  creep.pos.findClosestByPath(FIND_DROPPED_RESOURCES);
+                if (ground) {
+                    if (creep.pickup(ground) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(ground, { visualizePathStyle: { stroke: '#ffaa00' } });
                     }
-            });
-            if (container) {
-                if(creep.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(container, {visualizePathStyle: {stroke: '#ffaa00'}});
-                }
-            } else {
-                var sources = utils.findSources(creep);
-                if(creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(sources[0], {visualizePathStyle: {stroke: '#ffaa00'}});
+                } else {
+                    var container = Game.spawns['Spawn1'].pos.findClosestByPath(FIND_STRUCTURES, {
+                        filter: (structure) => {
+                            return (structure.structureType == STRUCTURE_CONTAINER || structure.structureType == STRUCTURE_STORAGE) &&
+                                structure.store[RESOURCE_ENERGY] > 0;
+                        }
+                    });
+                    if (container) {
+                        if (creep.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                            creep.moveTo(container, { visualizePathStyle: { stroke: '#ffaa00' } });
+                        }
+                    } else {
+                        var sources = utils.findSources(creep);
+                        if (creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
+                            creep.moveTo(sources[0], { visualizePathStyle: { stroke: '#ffaa00' } });
+                        }
+                    }
                 }
             }
-            }
-	    }
-	}
+        }
+    }
 };
 
 module.exports = roleBuilder;
