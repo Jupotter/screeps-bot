@@ -83,32 +83,27 @@ var roleBuilder = {
             }
 	    }
 	    else {
-            if (creep.room.name != creep.memory.ownRoom) {
-                var exit = Game.map.findExit(creep.room, creep.memory.ownRoom);
-                creep.moveTo(creep.room.find(exit)[0], { visualizePathStyle: { stroke: '#00ff00' } });
+            var ground;
+            // ground =  creep.pos.findClosestByPath(FIND_DROPPED_RESOURCES);
+            if (ground) {
+                if (creep.pickup(ground) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(ground, { visualizePathStyle: { stroke: '#ffaa00' } });
+                }
             } else {
-                var ground;
-                // ground =  creep.pos.findClosestByPath(FIND_DROPPED_RESOURCES);
-                if (ground) {
-                    if (creep.pickup(ground) == ERR_NOT_IN_RANGE) {
-                        creep.moveTo(ground, { visualizePathStyle: { stroke: '#ffaa00' } });
+                var container = Game.spawns['Spawn1'].pos.findClosestByPath(FIND_STRUCTURES, {
+                    filter: (structure) => {
+                        return (structure.structureType == STRUCTURE_CONTAINER || structure.structureType == STRUCTURE_STORAGE) &&
+                            structure.store[RESOURCE_ENERGY] > 0;
+                    }
+                });
+                if (container) {
+                    if (creep.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(container, { visualizePathStyle: { stroke: '#ffaa00' } });
                     }
                 } else {
-                    var container = Game.spawns['Spawn1'].pos.findClosestByPath(FIND_STRUCTURES, {
-                        filter: (structure) => {
-                            return (structure.structureType == STRUCTURE_CONTAINER || structure.structureType == STRUCTURE_STORAGE) &&
-                                structure.store[RESOURCE_ENERGY] > 0;
-                        }
-                    });
-                    if (container) {
-                        if (creep.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                            creep.moveTo(container, { visualizePathStyle: { stroke: '#ffaa00' } });
-                        }
-                    } else {
-                        var sources = utils.findSources(creep);
-                        if (creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
-                            creep.moveTo(sources[0], { visualizePathStyle: { stroke: '#ffaa00' } });
-                        }
+                    var sources = utils.findSources(creep);
+                    if (creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(sources[0], { visualizePathStyle: { stroke: '#ffaa00' } });
                     }
                 }
             }

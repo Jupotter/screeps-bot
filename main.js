@@ -98,12 +98,16 @@ module.exports.loop = function () {
 
     setupDoNotFill(spawn);
 
-    var sources;
-    if (!room.memory.sources) {
-        sources = room.find(FIND_SOURCES);
-        room.memory.sources = sources;
-    } else {
-        sources = room.memory.sources;
+    var sources = [];
+    for (var dest in Game.rooms) {
+        dest = Game.rooms[dest];
+        if (!dest.memory.sources) {
+            var thisSources = dest.find(FIND_SOURCES);
+            dest.memory.sources = thisSources;
+            sources = sources.concat(thisSources);
+        } else {
+            sources = sources.concat(dest.memory.sources);
+        }
     }
 
     var store = room.storage;
@@ -134,8 +138,13 @@ module.exports.loop = function () {
         roleBuilder.spawn(spawn, false, { ownRoom: room });
     }
     var upgrader = _.filter(Game.creeps, (creep) => creep.memory.role == 'upgrader');
-    if (upgrader.length < Game.rooms.length) {
-        roleUpgrader.spawn(spawn, false, { ownRoom: room });
+    if (upgrader.length < Object.keys(Game.rooms).length) {
+        for (var dest in Game.rooms) {
+            dest = Game.rooms[dest].memory;
+            if (!dest.upgrader || !Game.creeps[dest.upgrader] || Game.creeps[dest.upgrader].memory.role != 'upgrader') {
+                roleUpgrader.spawn(spawn, false, { ownRoom: dest.name });
+            }
+        }
     }
     var hauler = _.filter(Game.creeps, (creep) => creep.memory.role == 'hauler');
     if (hauler.length < sources.length + 1) {
@@ -197,5 +206,4 @@ module.exports.loop = function () {
             roleRemoteHarvester.run(creep);
         }
     }
-    room.memory.sources = sources;
 };

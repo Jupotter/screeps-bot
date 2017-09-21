@@ -25,8 +25,13 @@ var roleUpgrader = {
 	    }
 
 	    if(creep.memory.upgrading) {
-            if(creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(creep.room.controller, {visualizePathStyle: {stroke: '#ffffff'}});
+            if (creep.room.name != creep.memory.ownRoom) {
+                var exit = Game.map.findExit(creep.room, creep.memory.ownRoom);
+                creep.moveTo(creep.pos.findClosestByPath(exit), { visualizePathStyle: { stroke: '#00ff00' } });
+            } else {
+                if(creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(creep.room.controller, {visualizePathStyle: {stroke: '#ffffff'}});
+                }
             }
         }
         else {

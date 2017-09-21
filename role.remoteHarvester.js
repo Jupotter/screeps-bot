@@ -45,7 +45,7 @@ var roleRemoteHarvester = {
         } else {
             if (creep.room.name != room) {
                 var exit = Game.map.findExit(creep.room, room);
-                creep.moveTo(creep.room.find(exit)[0], {visualizePathStyle: {stroke: '#00ff00'}});
+                creep.moveTo(creep.pos.findClosestByPath(exit), {visualizePathStyle: {stroke: '#00ff00'}});
                 creep.memory.destination = creep.pos.findClosestByPath(FIND_STRUCTURES, {
                     filter: (s) => s.structureType == STRUCTURE_LINK
                 }).id;
