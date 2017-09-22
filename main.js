@@ -4,6 +4,7 @@ var roleBuilder = require('role.builder');
 var roleHauler = require('role.hauler');
 var roleClaimer = require('role.claimer');
 var roleRemoteHarvester = require('role.remoteHarvester');
+var roleKiller = require('role.killer');
 var utils = require('utils');
 
 
@@ -93,14 +94,21 @@ var recycle = function (creep, spawn) {
 module.exports.loop = function () {
     utils.clearMemory();
 
-    var spawn = Game.spawns.Spawn1;
-    var room = spawn.room;
+    for (var room in Game.rooms) {
+        room = Game.rooms[room];
+        var hostile = room.find(FIND_HOSTILE_CREEPS);
+        var spawn = Game.spawns.Spawn1;
+        for (var spawnN in Game.spawns) {
+            if (Game.spawns[spawnN].room.name == room.name) {
+                spawn = Game.spawns[spawnN];
+                break;
+            }
+        }
 
-    setupDoNotFill(spawn);
+        setupDoNotFill(spawn);
 
-    var sources = [];
-    for (var dest in Game.rooms) {
-        dest = Game.rooms[dest];
+        var sources = [];
+        var dest = room;
         if (!dest.memory.sources) {
             var thisSources = dest.find(FIND_SOURCES);
             dest.memory.sources = thisSources;
@@ -108,102 +116,113 @@ module.exports.loop = function () {
         } else {
             sources = sources.concat(dest.memory.sources);
         }
-    }
+        
 
-    var store = room.storage;
-    var energy = room.energyAvailable;
-    if (store) {
-        energy += store.store[RESOURCE_ENERGY];
-    }
-    console.log(energy);
-
-    var sites = spawn.room.find(FIND_CONSTRUCTION_SITES, {
-        filter: (s) => s.structureType != STRUCTURE_ROAD
-    });
-
-    handleTowers(room);
-
-    handleLinks(room, spawn);
-
-    var claimers = _.filter(Game.creeps, (creep) => creep.memory.role == 'claimer');
-    if (claimers.length < remoteRooms.length) {
-        roleClaimer.spawn(spawn, false, { ownRoom: room });
-    }
-    var remoteHarvesters = _.filter(Game.creeps, (creep) => creep.memory.role == 'remoteHarvester');
-    if (remoteHarvesters.length < remoteRooms.length) {
-        roleRemoteHarvester.spawn(spawn, false, { ownRoom: room });
-    }
-    var builders = _.filter(Game.creeps, (creep) => creep.memory.role == 'builder');
-    if (builders.length < (sites.length + 1) / 5) {
-        roleBuilder.spawn(spawn, false, { ownRoom: room });
-    }
-    var upgrader = _.filter(Game.creeps, (creep) => creep.memory.role == 'upgrader');
-    if (upgrader.length < Object.keys(Game.rooms).length) {
-        for (var dest in Game.rooms) {
-            dest = Game.rooms[dest].memory;
-            if (!dest.upgrader || !Game.creeps[dest.upgrader] || Game.creeps[dest.upgrader].memory.role != 'upgrader') {
-                roleUpgrader.spawn(spawn, false, { ownRoom: dest.name });
-            }
+        var store = room.storage;
+        var energy = room.energyAvailable;
+        if (store) {
+            energy += store.store[RESOURCE_ENERGY];
         }
-    }
-    var hauler = _.filter(Game.creeps, (creep) => creep.memory.role == 'hauler');
-    if (hauler.length < sources.length + 1) {
-        roleHauler.spawn(spawn, hauler.length == 0, { ownRoom: room });
-    }
-    var harvesters = _.filter(Game.creeps, (creep) => creep.memory.role == 'harvester');
-    if (harvesters.length < sources.length) {
-        roleHarvester.spawn(spawn, harvesters.length == 0, { ownRoom: room });
-    }
 
-    if (spawn.spawning) {
-        var spawningCreep = Game.creeps[spawn.spawning.name];
-        spawn.room.visual.text(
-            '🛠️' + spawningCreep.memory.role,
-            spawn.pos.x + 1,
-            spawn.pos.y,
-            { align: 'left', opacity: 0.8 });
-    }
+        var sites = spawn.room.find(FIND_CONSTRUCTION_SITES, {
+            filter: (s) => s.structureType != STRUCTURE_ROAD
+        });
 
-    var s = 0;
-    var h = 0;
-    for (var name in Game.creeps) {
-        var creep = Game.creeps[name];
-        if (creep.ticksToLive <= 50 || creep.memory.role == 'recycle') {
-            recycle(creep, spawn);
+        handleTowers(room);
+
+        handleLinks(room, spawn);
+
+        var claimers = _.filter(Game.creeps, (creep) => creep.memory.role == 'claimer' && creep.memory.ownRoom == room.name);
+        if (claimers.length < remoteRooms.length) {
+            roleClaimer.spawn(spawn, false, { ownRoom: room.name });
         }
-        if (creep.memory.role == 'harvester') {
-            if (!creep.memory.source) {
-                for (var i in sources) {
-                    source = sources[i];
-                    if (!source.creep || !Game.creeps[source.creep] || Memory.creeps[source.creep].role != 'harvester') {
-                        source.creep = creep.name;
-                        creep.memory.source = source.id;
-                        break;
-                    }
-                }
-            }
-            if (creep.memory.source) {
-                roleHarvester.run(creep);
-            } else {
+        var remoteHarvesters = _.filter(Game.creeps, (creep) => creep.memory.role == 'remoteHarvester'&& creep.memory.ownRoom == room.name);
+        if (remoteHarvesters.length < remoteRooms.length) {
+            roleRemoteHarvester.spawn(spawn, false, { ownRoom: room.name });
+        }
+        var builders = _.filter(Game.creeps, (creep) => creep.memory.role == 'builder' && creep.memory.ownRoom == room.name);
+        if (builders.length < (sites.length + 1) / 5) {
+            roleBuilder.spawn(spawn, false, { ownRoom: room.name });
+        }
+        var upgrader = _.filter(Game.creeps, (creep) => creep.memory.role == 'upgrader' && creep.memory.ownRoom == room.name);
+        if (upgrader.length < 1) {
+            roleUpgrader.spawn(spawn, false, { ownRoom: room.name });
+        }
+        var hauler = _.filter(Game.creeps, (creep) => creep.memory.role == 'hauler' && creep.memory.ownRoom == room.name);
+        if (hauler.length < sources.length + 1) {
+            roleHauler.spawn(spawn, hauler.length == 0, { ownRoom: room.name });
+        }
+        var harvesters = _.filter(Game.creeps, (creep) => creep.memory.role == 'harvester' && creep.memory.ownRoom == room.name);
+        if (harvesters.length < sources.length) {
+            roleHarvester.spawn(spawn, harvesters.length == 0, { ownRoom: room.name });
+        }
+        var killers = _.filter(Game.creeps, (creep) => creep.memory.role == 'killer' && creep.memory.ownRoom == room.name);
+        if (killers.length == 0 && hostile.length != 0) {
+            roleKiller.spawn(spawn, true, { ownRoom: room.name });
+        }
+
+        console.log("room: " + room.name);
+        console.log(energy + " energy available");
+        console.log("sources: " + sources);
+        console.log("Harvesters: " + harvesters);
+        console.log("Killers: " + killers);
+        console.log("Haulers: " + hauler);
+        console.log("Upgrader: " + upgrader);
+        console.log("Builder: " + builders);
+
+        if (spawn.spawning) {
+            var spawningCreep = Game.creeps[spawn.spawning.name];
+            spawn.room.visual.text(
+                '🛠️' + spawningCreep.memory.role,
+                spawn.pos.x + 1,
+                spawn.pos.y,
+                { align: 'left', opacity: 0.8 });
+        }
+
+        var s = 0;
+        var h = 0;
+        for (var name in Game.creeps) {
+            var creep = Game.creeps[name];
+            if (creep.ticksToLive <= 50 || creep.memory.role == 'recycle') {
                 recycle(creep, spawn);
             }
-        }
-        if (creep.memory.role == 'upgrader') {
-            roleUpgrader.run(creep);
-        }
-        if (creep.memory.role == 'builder') {
-            roleBuilder.run(creep);
-        }
-        if (creep.memory.role == 'hauler') {
-            roleHauler.run(creep, sources[h++]);
-        }
-        if (creep.memory.role == 'claimer') {
-            creep.memory.room = remoteRooms[0];
-            roleClaimer.run(creep);
-        }
-        if (creep.memory.role == 'remoteHarvester') {
-            creep.memory.room = remoteRooms[0];
-            roleRemoteHarvester.run(creep);
+            if (creep.memory.role == 'harvester') {
+                if (!creep.memory.source) {
+                    for (var i in sources) {
+                        source = sources[i];
+                        if (!source.creep || !Game.creeps[source.creep] || Memory.creeps[source.creep].role != 'harvester') {
+                            source.creep = creep.name;
+                            creep.memory.source = source.id;
+                            break;
+                        }
+                    }
+                }
+                if (creep.memory.source) {
+                    roleHarvester.run(creep);
+                } else {
+                    recycle(creep, spawn);
+                }
+            }
+            if (creep.memory.role == 'upgrader') {
+                roleUpgrader.run(creep);
+            }
+            if (creep.memory.role == 'builder') {
+                roleBuilder.run(creep);
+            }
+            if (creep.memory.role == 'hauler') {
+                roleHauler.run(creep, sources[h++]);
+            }
+            if (creep.memory.role == 'claimer') {
+                creep.memory.room = remoteRooms[0];
+                roleClaimer.run(creep);
+            }
+            if (creep.memory.role == 'killer') {
+                roleKiller.run(creep);
+            }
+            if (creep.memory.role == 'remoteHarvester') {
+                creep.memory.room = remoteRooms[0];
+                roleRemoteHarvester.run(creep);
+            }
         }
     }
 };

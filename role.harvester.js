@@ -3,23 +3,22 @@ var roleBuilder = require('role.builder');
 
 var roleHarvester = {
     //** @param {Spawn} spawn **/
-    spawn: function(spawn, force = false) {
+    spawn: function(spawn, force = false, memory = {}) {
         var body = utils.buildBody(spawn, [WORK], MOVE, 6);
+        memory.role = 'harvester';
         if (force || spawn.room.energyAvailable >= spawn.room.energyCapacityAvailable * 0.75) {
-            spawn.createCreep(body, undefined, {role: 'harvester'});
+            spawn.createCreep(body, undefined, memory);
         }
         return body;
-    },
-    
-    distance: function(a, b) {
-        var dist = (b.pos.x - a.pos.x)*(b.pos.x - a.pos.x) + (b.pos.y - a.pos.y)*(b.pos.y - a.pos.y);
-        console.log(dist);
-        return dist;
     },
     
     /** @param {Creep} creep **/
     run: function(creep) {
         var source = Game.getObjectById(creep.memory.source);
+        if (!source) {
+            delete creep.memory.source;
+            return;
+        }
         if(creep.carry.energy == 0) {
 	        creep.memory.harvest = true;
             if (source.energy == 0) {

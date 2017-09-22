@@ -9,9 +9,8 @@ var roleUpgrader = {
         var body = utils.buildBody(spawn, [WORK,CARRY,MOVE], null, 20);
         memory.role = 'upgrader';
         if (force || spawn.room.energyAvailable >= spawn.room.energyCapacityAvailable * 0.75) {
-            spawn.createCreep(body, undefined, memory);
+            return spawn.createCreep(body, undefined, memory);
         }
-        return body;
     },
 
     /** @param {Creep} creep **/
@@ -25,7 +24,7 @@ var roleUpgrader = {
 	    }
 
 	    if(creep.memory.upgrading) {
-            if (creep.room.name != creep.memory.ownRoom) {
+            if (creep.memory.ownRoom && creep.room.name != creep.memory.ownRoom) {
                 var exit = Game.map.findExit(creep.room, creep.memory.ownRoom);
                 creep.moveTo(creep.pos.findClosestByPath(exit), { visualizePathStyle: { stroke: '#00ff00' } });
             } else {

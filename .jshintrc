@@ -1,4 +1,5 @@
 {
     "esversion": 6,
-    "unused": true
+    "unused": true,
+    "loopfunc": true
 }

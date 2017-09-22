@@ -20,11 +20,21 @@ var roleHauler = {
     run: function(creep, source) {
         var that = this;
         var any = false;
+
+        if (!creep.memory.ownRoom) {
+            creep.memory.ownRoom = creep.room.name;
+        }
         if (!source) {
-            source = Game.spawns['Spawn1'];
-            any = true;
+            if (creep.room.name != creep.memory.ownRoom) {
+                var exit = Game.map.findExit(creep.room, creep.memory.ownRoom);
+                creep.moveTo(creep.pos.findClosestByPath(exit), {visualizePathStyle: {stroke: '#00ff00'}});
+                return;
+            } else {
+                source = creep.pos.findClosestByRange(FIND_MY_SPAWNS);
+                any = true;
+            }
         } else {
-            console.log(JSON.stringify(source));
+            //console.log(JSON.stringify(source));
             source = Game.getObjectById(source.id);
         }
         var tick = creep.memory.tick;
@@ -42,9 +52,9 @@ var roleHauler = {
         tick++;
         creep.memory.tick = tick;
         
-        if (creep.memory.harvest) {
+        if (creep.memory.harvest && source) {
             var ground;
-            ground =  source.pos.findClosestByPath(FIND_DROPPED_RESOURCES);
+            ground =  source.pos.findClosestByRange(FIND_DROPPED_RESOURCES);
             if (ground && ground.amount > 50) {
                 if (creep.pickup(ground) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(ground, {visualizePathStyle: {stroke: '#ffaa00'}});
@@ -106,7 +116,7 @@ var roleHauler = {
                     creep.moveTo(targets[0], {visualizePathStyle: {stroke: '#ffffff'}});
                 }
             } else {
-                creep.moveTo(Game.spawns['Spawn1']);
+                creep.moveTo(creep.room.controller);
             } 
         }
 	}

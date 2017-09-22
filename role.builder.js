@@ -84,13 +84,13 @@ var roleBuilder = {
 	    }
 	    else {
             var ground;
-            // ground =  creep.pos.findClosestByPath(FIND_DROPPED_RESOURCES);
+            ground =  creep.pos.findClosestByPath(FIND_DROPPED_RESOURCES);
             if (ground) {
                 if (creep.pickup(ground) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(ground, { visualizePathStyle: { stroke: '#ffaa00' } });
                 }
             } else {
-                var container = Game.spawns['Spawn1'].pos.findClosestByPath(FIND_STRUCTURES, {
+                var container = creep.room.find(FIND_MY_SPAWNS)[0].pos.findClosestByPath(FIND_STRUCTURES, {
                     filter: (structure) => {
                         return (structure.structureType == STRUCTURE_CONTAINER || structure.structureType == STRUCTURE_STORAGE) &&
                             structure.store[RESOURCE_ENERGY] > 0;
