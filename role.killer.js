@@ -15,7 +15,7 @@ var roleKiller = {
     
     /** @param {Creep} creep **/
     run: function(creep) {
-        var room = Game.room[creep.memory.ownRoom];
+        var room = Game.rooms[creep.memory.ownRoom];
         var hostile = room.find(FIND_HOSTILE_CREEPS);
         if (hostile.length != 0) {
             hostile.sort(utils.sortDistance(tower));
