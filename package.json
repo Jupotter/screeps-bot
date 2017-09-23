@@ -1,0 +1,23 @@
+{
+  "name": "screeps_ai",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "dependencies": {
+    "collections": "^5.0.7"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jupotter/screeps-bot.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Jupotter/screeps-bot/issues"
+  },
+  "homepage": "https://github.com/Jupotter/screeps-bot#readme"
+}
