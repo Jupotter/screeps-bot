@@ -10,9 +10,7 @@ var roleHauler = {
     spawn: function(spawn, force = false, memory = {}) {
         var body = utils.buildBody(spawn, [MOVE,CARRY]);
         memory.role = 'hauler';
-        if (force || spawn.room.energyAvailable >= spawn.room.energyCapacityAvailable * 0.75) {
             spawn.createCreep(body, undefined, memory);
-        }
         return body;
     },
     
@@ -87,15 +85,21 @@ var roleHauler = {
             var targets = creep.room.find(FIND_STRUCTURES, {
                     filter: (structure) => {
                         return (
-                                ((structure.structureType == STRUCTURE_EXTENSION || 
+                                (structure.structureType == STRUCTURE_EXTENSION || 
                                     structure.structureType == STRUCTURE_SPAWN )&&
-                                    structure.energy < structure.energyCapacity) ||
-                                ((
-                                    structure.structureType == STRUCTURE_TOWER
-                                ) && structure.energy <= structure.energyCapacity - 100)
+                                    structure.energy < structure.energyCapacity
                             );
                     }
             });
+            if(targets.length == 0) {
+                targets = creep.room.find(FIND_STRUCTURES, {
+                    filter: (structure) => {
+                        return ( structure.structureType == STRUCTURE_TOWER
+                                 && structure.energy <= structure.energyCapacity - 100
+                            );
+                    }
+                });
+            }
             if(targets.length == 0) {
                 targets = creep.room.find(FIND_STRUCTURES, {
                         filter: (structure) => {
@@ -116,7 +120,7 @@ var roleHauler = {
                     creep.moveTo(targets[0], {visualizePathStyle: {stroke: '#ffffff'}});
                 }
             } else {
-                creep.moveTo(creep.room.controller);
+                creep.moveTo(Game.rooms[creep.memory.ownRoom].controller);
             } 
         }
 	}

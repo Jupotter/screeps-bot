@@ -67,7 +67,7 @@ function setupDoNotFill(spawn) {
     }
 }
 
-var remoteRooms = [];
+var remoteRooms = ['E26N41'];
 
 /** @param {Creep} creep **/
 var recycle = function (creep, spawn) {
@@ -97,6 +97,9 @@ module.exports.loop = function () {
 
     for (var room in Game.rooms) {
         room = Game.rooms[room];
+        if (!room.controller || !room.controller.my) {
+            continue;
+        }
         var hostile = room.find(FIND_HOSTILE_CREEPS);
         var spawn = Game.spawns.Spawn1;
         for (var spawnN in Game.spawns) {
@@ -182,8 +185,9 @@ module.exports.loop = function () {
 
         var s = 0;
         var h = 0;
-        for (var name in Game.creeps) {
-            var creep = Game.creeps[name];
+        var owncreep = _.filter(Game.creeps, (creep) => creep.memory.ownRoom == room.name);
+        for (var name in owncreep) {
+            var creep = owncreep[name];
             if (creep.ticksToLive <= 50 || creep.memory.role == 'recycle') {
                 recycle(creep, spawn);
             }

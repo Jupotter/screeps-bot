@@ -8,9 +8,7 @@ var roleBuilder = {
     spawn: function(spawn, force = false, memory = {}) {
         var body = utils.buildBody(spawn, [WORK,CARRY,MOVE], null, 20);
         memory.role = 'builder';
-        if (force || spawn.room.energyAvailable >= spawn.room.energyCapacityAvailable * 0.75) {
             spawn.createCreep(body, undefined, memory);
-        }
         return body;
     },
     
@@ -28,6 +26,8 @@ var roleBuilder = {
             STRUCTURE_STORAGE,
             STRUCTURE_SPAWN,
             STRUCTURE_LINK,
+            STRUCTURE_EXTRACTOR,
+            STRUCTURE_TERMINAL,
             STRUCTURE_WALL];
 
 	    if(creep.memory.building && creep.carry.energy == 0) {
@@ -90,7 +90,7 @@ var roleBuilder = {
                     creep.moveTo(ground, { visualizePathStyle: { stroke: '#ffaa00' } });
                 }
             } else {
-                var container = creep.room.find(FIND_MY_SPAWNS)[0].pos.findClosestByPath(FIND_STRUCTURES, {
+                var container = Game.rooms[creep.memory.ownRoom].find(FIND_MY_SPAWNS)[0].pos.findClosestByPath(FIND_STRUCTURES, {
                     filter: (structure) => {
                         return (structure.structureType == STRUCTURE_CONTAINER || structure.structureType == STRUCTURE_STORAGE) &&
                             structure.store[RESOURCE_ENERGY] > 0;
