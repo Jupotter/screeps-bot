@@ -8,7 +8,7 @@ var roleUpgrader = {
     spawn: function(spawn, force = false, memory = {}) {
         var body = utils.buildBody(spawn, [WORK,CARRY,MOVE], null, 20);
         memory.role = 'upgrader';
-            return spawn.createCreep(body, undefined, memory);
+            return spawn.createCreep(body, 'Upgrader'+Game.time.toString(), memory);
     },
 
     /** @param {Creep} creep **/

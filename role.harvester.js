@@ -6,7 +6,7 @@ var roleHarvester = {
     spawn: function(spawn, force = false, memory = {}) {
         var body = utils.buildBody(spawn, [WORK], MOVE, 6);
         memory.role = 'harvester';
-            spawn.createCreep(body, undefined, memory);
+            spawn.createCreep(body, 'harvester'+Game.time.toString(), memory);
         return body;
     },
     

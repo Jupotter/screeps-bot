@@ -10,7 +10,7 @@ var roleHauler = {
     spawn: function(spawn, force = false, memory = {}) {
         var body = utils.buildBody(spawn, [MOVE,CARRY]);
         memory.role = 'hauler';
-            spawn.createCreep(body, undefined, memory);
+            spawn.createCreep(body, 'hauler'+Game.time.toString(), memory);
         return body;
     },
     
@@ -82,34 +82,34 @@ var roleHauler = {
                 }
             }
         } else {
-            var targets = creep.room.find(FIND_STRUCTURES, {
-                    filter: (structure) => {
+            var structures = creep.room.find(FIND_STRUCTURES);
+            var targets = _.filter(structures, 
+                     (structure) => {
                         return (
                                 (structure.structureType == STRUCTURE_EXTENSION || 
                                     structure.structureType == STRUCTURE_SPAWN )&&
                                     structure.energy < structure.energyCapacity
                             );
-                    }
             });
             if(targets.length == 0) {
-                targets = creep.room.find(FIND_STRUCTURES, {
-                    filter: (structure) => {
+                targets = _.filter(structures, 
+                    (structure) => {
                         return ( structure.structureType == STRUCTURE_TOWER
                                  && structure.energy <= structure.energyCapacity - 100
-                            );
-                    }
+                            )
+                            || (structure.structureType == STRUCTURE_TERMINAL
+                            && structure.store.energy < 10000);
                 });
             }
             if(targets.length == 0) {
-                targets = creep.room.find(FIND_STRUCTURES, {
-                        filter: (structure) => {
+                targets = _.filter(structures, 
+                        (structure) => {
                         if (that.doNotFill.indexOf(structure.id) > -1) {
                             return false;
                         }
                         return (structure.structureType == STRUCTURE_CONTAINER || structure.structureType == STRUCTURE_STORAGE) && 
                                   (!creep.memory.orig || structure.id != creep.memory.orig.id) && 
                                   structure.store[RESOURCE_ENERGY] < structure.storeCapacity - creep.carryCapacity;
-                    }
                 });
             }
             

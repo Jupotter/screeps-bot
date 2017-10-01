@@ -7,7 +7,7 @@ var roleKiller = {
     spawn: function(spawn, force = false, memory = {}) {
         var body = utils.buildBody(spawn, [ATTACK,MOVE], null, 10);
         memory.role = 'killer';
-            spawn.createCreep(body, undefined, memory);
+            spawn.createCreep(body, 'killer'+Game.time.toString(), memory);
         return body;
     },
     

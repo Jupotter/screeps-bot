@@ -6,7 +6,9 @@ var roleHauler = require('role.hauler');
 var roleClaimer = require('role.claimer');
 var roleRemoteHarvester = require('role.remoteHarvester');
 var roleKiller = require('role.killer');
+var roleMHarvester = require('role.mineralHarvester');
 var utils = require('utils');
+var infoFlag = require('./infoFlag');
 
 
 var roles = {
@@ -94,9 +96,24 @@ var recycle = function (creep, spawn) {
 
 module.exports.loop = function () {
     utils.clearMemory();
+    infoFlag.go();
+    console.log("<hrule />");
+    console.log("credits: " + Game.market.credits)
+    
+    var mainSpawn = Game.spawns.Spawn1;
+    var claimers = _.filter(Game.creeps, (creep) => creep.memory.role == 'claimer');
+    // if (claimers.length < remoteRooms.length) {
+    //     roleClaimer.spawn(mainSpawn, false, { ownRoom: mainSpawn.room.name });
+    // }
+    var remoteHarvesters = _.filter(Game.creeps, (creep) => creep.memory.role == 'remoteHarvester');
+    if (remoteHarvesters.length < remoteRooms.length) {
+        roleRemoteHarvester.spawn(mainSpawn, false, { ownRoom: mainSpawn.room.name });
+    }
 
     for (var room in Game.rooms) {
         room = Game.rooms[room];
+        
+        console.log("room: " + room.name);
         if (!room.controller || !room.controller.my) {
             continue;
         }
@@ -131,18 +148,28 @@ module.exports.loop = function () {
         var sites = spawn.room.find(FIND_CONSTRUCTION_SITES, {
             filter: (s) => s.structureType != STRUCTURE_ROAD
         });
+        var extractor = room.find(FIND_MINERALS, {
+            filter: (s) => s.pos.lookFor(LOOK_STRUCTURES).length != 0 && s.amount > 0
+        });
+        
+        if (extractor.length != 0) {
+            var mineral = extractor[0].mineralType
+            var terminal = room.terminal;
+            if (terminal.store[mineral] > 0) {
+                var transactions = Game.market.getAllOrders({type: ORDER_BUY, resourceType: mineral});
+                transactions = transactions.sort((t1, t2) => Game.map.getRoomLinearDistance(room.name, t1.roomName, true) -Game.map.getRoomLinearDistance(room.name, t2.roomName, true));
+                var deal = transactions[0];s
+                var dealResult = Game.market.deal(deal.id, Math.min(terminal.store[mineral], deal.amount), room.name);
+            }
+        }
 
         handleTowers(room);
 
         handleLinks(room, spawn);
 
-        var claimers = _.filter(Game.creeps, (creep) => creep.memory.role == 'claimer' && creep.memory.ownRoom == room.name);
-        if (claimers.length < remoteRooms.length) {
-            roleClaimer.spawn(spawn, false, { ownRoom: room.name });
-        }
-        var remoteHarvesters = _.filter(Game.creeps, (creep) => creep.memory.role == 'remoteHarvester'&& creep.memory.ownRoom == room.name);
-        if (remoteHarvesters.length < remoteRooms.length) {
-            roleRemoteHarvester.spawn(spawn, false, { ownRoom: room.name });
+        var miners = _.filter(Game.creeps, (creep) => creep.memory.role == 'mineralHarvester' && creep.memory.ownRoom == room.name);
+        if (miners.length < extractor.length) {
+            roleMHarvester.spawn(spawn, false, { ownRoom: room.name });
         }
         var builders = _.filter(Game.creeps, (creep) => creep.memory.role == 'builder' && creep.memory.ownRoom == room.name);
         if (builders.length < (sites.length + 1) / 5) {
@@ -165,14 +192,14 @@ module.exports.loop = function () {
             roleKiller.spawn(spawn, true, { ownRoom: room.name });
         }
 
-        console.log("room: " + room.name);
         console.log(energy + " energy available");
         console.log("sources: " + sources);
         console.log("Harvesters: " + harvesters);
-        console.log("Killers: " + killers);
         console.log("Haulers: " + hauler);
         console.log("Upgrader: " + upgrader);
         console.log("Builder: " + builders);
+        console.log("Killers: " + killers);
+        console.log("Miners: " + miners);
 
         if (spawn.spawning) {
             var spawningCreep = Game.creeps[spawn.spawning.name];
@@ -227,6 +254,10 @@ module.exports.loop = function () {
             if (creep.memory.role == 'remoteHarvester') {
                 creep.memory.room = remoteRooms[0];
                 roleRemoteHarvester.run(creep);
+            }
+            
+            if (creep.memory.role == 'mineralHarvester') {
+                roleMHarvester.run(creep);
             }
         }
     }

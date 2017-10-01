@@ -9,7 +9,7 @@ var roleRemoteHarvester = {
         var body = utils.buildBody(spawn, [WORK,CARRY,MOVE], null, 15);
         memory.role = 'remoteHarvester';
         if (force || spawn.room.energyAvailable >= spawn.room.energyCapacityAvailable * 0.75) {
-            spawn.createCreep(body, undefined, memory);
+            spawn.createCreep(body, 'RemoteHavester'+Game.time.toString(), memory);
         }
         return body;
     },

@@ -9,7 +9,7 @@ var roleClaimer = {
         var body = [CLAIM, CLAIM, MOVE, MOVE];
         memory.role = 'claimer';
         if (force || spawn.room.energyAvailable >= spawn.room.energyCapacityAvailable * 0.75) {
-            spawn.createCreep(body, undefined, memory);
+            spawn.createCreep(body, 'claimer'+Game.time.toString(), memory);
         }
         return body;
     },

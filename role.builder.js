@@ -8,7 +8,7 @@ var roleBuilder = {
     spawn: function(spawn, force = false, memory = {}) {
         var body = utils.buildBody(spawn, [WORK,CARRY,MOVE], null, 20);
         memory.role = 'builder';
-            spawn.createCreep(body, undefined, memory);
+            spawn.createCreep(body, 'builder'+Game.time.toString(), memory);
         return body;
     },
     
