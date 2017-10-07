@@ -69,7 +69,7 @@ function setupDoNotFill(spawn) {
     }
 }
 
-var remoteRooms = ['E26N41'];
+var remoteRooms = ['E25N41'];
 
 /** @param {Creep} creep **/
 var recycle = function (creep, spawn) {
@@ -96,15 +96,14 @@ var recycle = function (creep, spawn) {
 
 module.exports.loop = function () {
     utils.clearMemory();
-    infoFlag.go();
     console.log("<hrule />");
     console.log("credits: " + Game.market.credits)
     
     var mainSpawn = Game.spawns.Spawn1;
     var claimers = _.filter(Game.creeps, (creep) => creep.memory.role == 'claimer');
-    // if (claimers.length < remoteRooms.length) {
-    //     roleClaimer.spawn(mainSpawn, false, { ownRoom: mainSpawn.room.name });
-    // }
+    if (claimers.length < remoteRooms.length) {
+        roleClaimer.spawn(mainSpawn, false, { ownRoom: mainSpawn.room.name });
+    }
     var remoteHarvesters = _.filter(Game.creeps, (creep) => creep.memory.role == 'remoteHarvester');
     if (remoteHarvesters.length < remoteRooms.length) {
         roleRemoteHarvester.spawn(mainSpawn, false, { ownRoom: mainSpawn.room.name });
@@ -118,13 +117,16 @@ module.exports.loop = function () {
             continue;
         }
         var hostile = room.find(FIND_HOSTILE_CREEPS);
-        var spawn = Game.spawns.Spawn1;
+        var spawn = mainSpawn;
         for (var spawnN in Game.spawns) {
             if (Game.spawns[spawnN].room.name == room.name) {
                 spawn = Game.spawns[spawnN];
+                infoFlag.go(spawn);
+                room.memory.spawn = spawn.id;
                 break;
             }
         }
+
 
         setupDoNotFill(spawn);
 
@@ -149,10 +151,10 @@ module.exports.loop = function () {
             filter: (s) => s.structureType != STRUCTURE_ROAD
         });
         var extractor = room.find(FIND_MINERALS, {
-            filter: (s) => s.pos.lookFor(LOOK_STRUCTURES).length != 0 && s.amount > 0
+            filter: (s) => s.pos.lookFor(LOOK_STRUCTURES).length != 0 && s.mineralAmount > 0
         });
         
-        if (extractor.length != 0) {
+        if (extractor.length != 0 && room.terminal) {
             var mineral = extractor[0].mineralType
             var terminal = room.terminal;
             if (terminal.store[mineral] > 0) {

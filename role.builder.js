@@ -90,12 +90,15 @@ var roleBuilder = {
                     creep.moveTo(ground, { visualizePathStyle: { stroke: '#ffaa00' } });
                 }
             } else {
-                var container = Game.rooms[creep.memory.ownRoom].find(FIND_MY_SPAWNS)[0].pos.findClosestByPath(FIND_STRUCTURES, {
-                    filter: (structure) => {
-                        return (structure.structureType == STRUCTURE_CONTAINER || structure.structureType == STRUCTURE_STORAGE) &&
-                            structure.store[RESOURCE_ENERGY] > 0;
-                    }
-                });
+                var spawn =Game.getObjectById(Game.rooms[creep.memory.ownRoom].memory.spawn);
+                if (spawn) {
+                        var container = spawn.pos.findClosestByPath(FIND_STRUCTURES, {
+                        filter: (structure) => {
+                            return (structure.structureType == STRUCTURE_CONTAINER || structure.structureType == STRUCTURE_STORAGE) &&
+                                structure.store[RESOURCE_ENERGY] > 0;
+                        }
+                    });
+                }
                 if (container) {
                     if (creep.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                         creep.moveTo(container, { visualizePathStyle: { stroke: '#ffaa00' } });

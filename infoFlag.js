@@ -9,9 +9,8 @@
 
 module.exports = {
       
-    go:function()
+    go:function(spawn)
     {
-        var spawn = Game.spawns["Spawn1"];
         var texte =" \n\n\n";
         var x = 22;
         var y =44;
