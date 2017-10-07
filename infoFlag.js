@@ -14,10 +14,17 @@ module.exports = {
         var texte =" \n\n\n";
         var x = 22;
         var y =44;
+
+        var room = spawn.room;
+        var store = room.storage;
+        var energy = room.energyAvailable;
+        if (store) {
+            energy += store.store[RESOURCE_ENERGY];
+        }
         
         //console.log(JSON.stringify(flag));
         texte += '⚡ Core : ' + spawn.room.energyAvailable + " / " + spawn.room.energyCapacityAvailable  + "\n\n\n"  ;
-        texte +=  "🔨 Storage : " + spawn.room.storage.store[RESOURCE_ENERGY];
+        texte +=  "🔨 Storage : " + energy;
         
         spawn.room.visual.text(
                  texte,

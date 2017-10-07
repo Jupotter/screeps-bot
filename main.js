@@ -97,7 +97,7 @@ var recycle = function (creep, spawn) {
 module.exports.loop = function () {
     utils.clearMemory();
     console.log("<hrule />");
-    console.log("credits: " + Game.market.credits)
+    console.log("credits: " + Game.market.credits);
     
     var mainSpawn = Game.spawns.Spawn1;
     var claimers = _.filter(Game.creeps, (creep) => creep.memory.role == 'claimer');
@@ -155,12 +155,12 @@ module.exports.loop = function () {
         });
         
         if (extractor.length != 0 && room.terminal) {
-            var mineral = extractor[0].mineralType
+            var mineral = extractor[0].mineralType;
             var terminal = room.terminal;
             if (terminal.store[mineral] > 0) {
                 var transactions = Game.market.getAllOrders({type: ORDER_BUY, resourceType: mineral});
                 transactions = transactions.sort((t1, t2) => Game.map.getRoomLinearDistance(room.name, t1.roomName, true) -Game.map.getRoomLinearDistance(room.name, t2.roomName, true));
-                var deal = transactions[0];s
+                var deal = transactions[0];
                 var dealResult = Game.market.deal(deal.id, Math.min(terminal.store[mineral], deal.amount), room.name);
             }
         }
@@ -219,47 +219,49 @@ module.exports.loop = function () {
             var creep = owncreep[name];
             if (creep.ticksToLive <= 50 || creep.memory.role == 'recycle') {
                 recycle(creep, spawn);
-            }
-            if (creep.memory.role == 'harvester') {
-                if (!creep.memory.source) {
-                    for (var i in sources) {
-                        source = sources[i];
-                        if (!source.creep || !Game.creeps[source.creep] || Memory.creeps[source.creep].role != 'harvester') {
-                            source.creep = creep.name;
-                            creep.memory.source = source.id;
-                            break;
+            } else {
+                switch (creep.memory.role) {
+                    case 'harvester':
+                        if (!creep.memory.source) {
+                            for (var i in sources) {
+                                source = sources[i];
+                                if (!source.creep || !Game.creeps[source.creep] || Memory.creeps[source.creep].role != 'harvester') {
+                                    source.creep = creep.name;
+                                    creep.memory.source = source.id;
+                                    break;
+                                }
+                            }
                         }
-                    }
+                        if (creep.memory.source) {
+                            roleHarvester.run(creep);
+                        } else {
+                            recycle(creep, spawn);
+                        }
+                        break;
+                    case 'upgrader':
+                        roleUpgrader.run(creep);
+                        break;
+                    case 'builder':
+                        roleBuilder.run(creep);
+                        break;
+                    case 'hauler':
+                        roleHauler.run(creep, sources[h++]);
+                        break;
+                    case 'claimer':
+                        creep.memory.room = remoteRooms[0];
+                        roleClaimer.run(creep);
+                        break;
+                    case 'killer':
+                        roleKiller.run(creep);
+                        break;
+                    case 'remoteHarvester':
+                        creep.memory.room = remoteRooms[0];
+                        roleRemoteHarvester.run(creep);
+                        break;
+                    case 'mineralHarvester':
+                        roleMHarvester.run(creep);
+                        break;
                 }
-                if (creep.memory.source) {
-                    roleHarvester.run(creep);
-                } else {
-                    recycle(creep, spawn);
-                }
-            }
-            if (creep.memory.role == 'upgrader') {
-                roleUpgrader.run(creep);
-            }
-            if (creep.memory.role == 'builder') {
-                roleBuilder.run(creep);
-            }
-            if (creep.memory.role == 'hauler') {
-                roleHauler.run(creep, sources[h++]);
-            }
-            if (creep.memory.role == 'claimer') {
-                creep.memory.room = remoteRooms[0];
-                roleClaimer.run(creep);
-            }
-            if (creep.memory.role == 'killer') {
-                roleKiller.run(creep);
-            }
-            if (creep.memory.role == 'remoteHarvester') {
-                creep.memory.room = remoteRooms[0];
-                roleRemoteHarvester.run(creep);
-            }
-            
-            if (creep.memory.role == 'mineralHarvester') {
-                roleMHarvester.run(creep);
             }
         }
     }

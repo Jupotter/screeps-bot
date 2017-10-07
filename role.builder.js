@@ -66,7 +66,7 @@ var roleBuilder = {
                             return a.structureType == struct;
                         }});
                         if (targets.length > 0) {
-                            target = targets[0]
+                            target = targets[0];
                             break;
                         }
                     }
@@ -91,8 +91,9 @@ var roleBuilder = {
                 }
             } else {
                 var spawn =Game.getObjectById(Game.rooms[creep.memory.ownRoom].memory.spawn);
+                var container;
                 if (spawn) {
-                        var container = spawn.pos.findClosestByPath(FIND_STRUCTURES, {
+                        container = spawn.pos.findClosestByPath(FIND_STRUCTURES, {
                         filter: (structure) => {
                             return (structure.structureType == STRUCTURE_CONTAINER || structure.structureType == STRUCTURE_STORAGE) &&
                                 structure.store[RESOURCE_ENERGY] > 0;
