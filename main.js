@@ -10,14 +10,6 @@ var roleMHarvester = require('role.mineralHarvester');
 var utils = require('utils');
 var infoFlag = require('./infoFlag');
 
-
-var roles = {
-    harvester: roleHarvester,
-    upgrader: roleUpgrader,
-    builder: roleBuilder,
-    hauler: roleHauler
-};
-
 function handleTowers(room) {
     var hostile = room.find(FIND_HOSTILE_CREEPS);
     var towers = room.find(FIND_STRUCTURES, {
@@ -161,7 +153,7 @@ module.exports.loop = function () {
                 var transactions = Game.market.getAllOrders({type: ORDER_BUY, resourceType: mineral});
                 transactions = transactions.sort((t1, t2) => Game.map.getRoomLinearDistance(room.name, t1.roomName, true) -Game.map.getRoomLinearDistance(room.name, t2.roomName, true));
                 var deal = transactions[0];
-                var dealResult = Game.market.deal(deal.id, Math.min(terminal.store[mineral], deal.amount), room.name);
+                Game.market.deal(deal.id, Math.min(terminal.store[mineral], deal.amount), room.name);
             }
         }
 
@@ -212,7 +204,6 @@ module.exports.loop = function () {
                 { align: 'left', opacity: 0.8 });
         }
 
-        var s = 0;
         var h = 0;
         var owncreep = _.filter(Game.creeps, (creep) => creep.memory.ownRoom == room.name);
         for (var name in owncreep) {

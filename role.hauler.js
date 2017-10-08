@@ -1,5 +1,4 @@
 var utils = require('utils');
-var roleHarvester = require('role.harvester');
 
 var roleHauler = {
     doNotFill : [],
@@ -16,7 +15,6 @@ var roleHauler = {
     
     /** @param {Creep} creep **/
     run: function(creep, source) {
-        var that = this;
         var any = false;
 
         if (!creep.memory.ownRoom) {
@@ -104,9 +102,9 @@ var roleHauler = {
             if(targets.length == 0) {
                 targets = _.filter(structures, 
                         (structure) => {
-                        if (that.doNotFill.indexOf(structure.id) > -1) {
-                            return false;
-                        }
+                        // if (that.doNotFill.indexOf(structure.id) > -1) {
+                        //     return false;
+                        // }
                         return (structure.structureType == STRUCTURE_CONTAINER || structure.structureType == STRUCTURE_STORAGE) && 
                                   (!creep.memory.orig || structure.id != creep.memory.orig.id) && 
                                   structure.store[RESOURCE_ENERGY] < structure.storeCapacity - creep.carryCapacity;

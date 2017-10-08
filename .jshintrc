@@ -1,5 +1,6 @@
 {
     "esversion": 6,
     "unused": true,
-    "loopfunc": true
+    "loopfunc": true,
+    "laxbreak": true 
 }
