@@ -36,7 +36,7 @@ var roleHarvester = {
                 filter: (structure) => {
                         return structure.structureType == STRUCTURE_CONTAINER;
                     }
-            })
+            });
             if (container != null) {
                 if(creep.transfer(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(container, {visualizePathStyle: {stroke: '#ffffff'}});

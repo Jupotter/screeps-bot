@@ -61,7 +61,7 @@ function setupDoNotFill(spawn) {
     }
 }
 
-var remoteRooms = ['E25N41'];
+var remoteRooms = [];
 
 /** @param {Creep} creep **/
 var recycle = function (creep, spawn) {
@@ -84,7 +84,7 @@ var recycle = function (creep, spawn) {
     }
 };
 
-
+var upgraderByLevel = [1, 1, 1, 1, 2, 2, 2, 3, 3];
 
 module.exports.loop = function () {
     utils.clearMemory();
@@ -153,7 +153,9 @@ module.exports.loop = function () {
                 var transactions = Game.market.getAllOrders({type: ORDER_BUY, resourceType: mineral});
                 transactions = transactions.sort((t1, t2) => Game.map.getRoomLinearDistance(room.name, t1.roomName, true) -Game.map.getRoomLinearDistance(room.name, t2.roomName, true));
                 var deal = transactions[0];
-                Game.market.deal(deal.id, Math.min(terminal.store[mineral], deal.amount), room.name);
+                if (deal) {
+                    Game.market.deal(deal.id, Math.min(terminal.store[mineral], deal.amount), room.name);
+                }
             }
         }
 
@@ -170,7 +172,7 @@ module.exports.loop = function () {
             roleBuilder.spawn(spawn, false, { ownRoom: room.name });
         }
         var upgrader = _.filter(Game.creeps, (creep) => creep.memory.role == 'upgrader' && creep.memory.ownRoom == room.name);
-        if (upgrader.length < 1) {
+        if (upgrader.length < upgraderByLevel[room.controller.level] ) {
             roleUpgrader.spawn(spawn, false, { ownRoom: room.name });
         }
         var hauler = _.filter(Game.creeps, (creep) => creep.memory.role == 'hauler' && creep.memory.ownRoom == room.name);
