@@ -1,4 +1,6 @@
 import { InfoFlag } from "infoFlag";
+import { RoleWorker } from "role/worker";
+import { Utils } from "utils";
 import { ErrorMapper } from "utils/ErrorMapper";
 
 // When compiling TS to JS and bundling with rollup, the line numbers and file names in error messages change
@@ -13,10 +15,21 @@ export const loop = ErrorMapper.wrapLoop(() => {
         infoFlag.printInfo();
     });
 
-    // Automatically delete memory of missing creeps
-    for (const name in Memory.creeps) {
-        if (!(name in Game.creeps)) {
-            delete Memory.creeps[name];
+    for (const roomName in Game.rooms) {
+        const room = Game.rooms[roomName];
+
+        const spawn = room.find(FIND_MY_SPAWNS)[0];
+
+        const workers = _.filter(
+            Game.creeps,
+            creep => creep.memory.role === "worker" && creep.memory.ownRoom === room.name
+        );
+
+        if (workers.length < 3) {
+            RoleWorker.spawn(spawn, false, { ownRoom: room.name });
         }
+
+        workers.forEach(c => RoleWorker.run(c));
     }
+    Utils.ClearMemory();
 });
