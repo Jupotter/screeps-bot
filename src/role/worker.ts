@@ -174,7 +174,7 @@ export class RoleWorker {
         if (creep.carry.energy === 0) {
             memory.state = WorkerState.HARVESTING;
             memory.target = null;
-            this.upgrading(creep, memory);
+            this.harvesting(creep, memory);
         }
     }
 
