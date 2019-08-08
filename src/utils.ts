@@ -41,23 +41,28 @@ export class Utils {
             body.push(first);
         }
         let cost = that.BodyCost(base);
-        let added = false;
-        do {
-            added = false;
+        let added = true;
+        while (added && cost < capacity) {
             for (const i in base) {
+                added = false;
                 const part = base[i];
                 // console.log(part);
-                if (cost + BODYPART_COST[part] <= capacity) {
+                if (cost + BODYPART_COST[part] < capacity) {
                     body.push(part);
                     cost += BODYPART_COST[part];
+                    console.log(`${body}: ${cost}`);
                     added = true;
+                } else {
+                    added = false;
+                    console.log(`${body}: ${cost}`);
+                    break;
                 }
                 if (limit !== 0 && body.length >= limit) {
                     added = false;
                     break;
                 }
             }
-        } while (added && cost < capacity);
+        }
         return body;
     }
 

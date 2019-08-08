@@ -4,7 +4,8 @@ enum WorkerState {
     SPAWNING,
     HARVESTING,
     BUILDING,
-    UPGRADING
+    UPGRADING,
+    FILLING
 }
 
 interface WorkerMemory extends CreepMemory {
@@ -32,7 +33,8 @@ export class RoleWorker {
         const fullMemory = memory as WorkerMemory;
         fullMemory.role = "worker";
         fullMemory.state = WorkerState.SPAWNING;
-        spawn.createCreep(body, "worker" + Game.time.toString(), fullMemory);
+        console.log("Spawning worker");
+        spawn.spawnCreep(body, "worker" + Game.time.toString(), { memory: fullMemory });
         return body;
     }
 
@@ -146,13 +148,15 @@ export class RoleWorker {
                 creep.moveTo(target, { visualizePathStyle: { stroke: "#ffffff" } });
             }
         } else {
-            memory.state = WorkerState.UPGRADING;
+            memory.state = WorkerState.FILLING;
+            this.filling(creep, memory);
+            return;
         }
 
         if (creep.carry.energy === 0) {
             memory.state = WorkerState.HARVESTING;
             memory.target = null;
-            this.upgrading(creep, memory);
+            this.harvesting(creep, memory);
         }
     }
 
@@ -167,6 +171,28 @@ export class RoleWorker {
             creep.say("⬆ Upgrade");
         }
         if (creep.upgradeController(target) === ERR_NOT_IN_RANGE) {
+            creep.moveTo(target, { visualizePathStyle: { stroke: "#ffffff" } });
+        }
+
+        if (creep.carry.energy === 0) {
+            memory.state = WorkerState.HARVESTING;
+            memory.target = null;
+            this.harvesting(creep, memory);
+        }
+    }
+
+    private static filling(creep: Creep, memory: WorkerMemory) {
+        const targetId = Memory.rooms[memory.ownRoom].spawn;
+
+        const target = Game.getObjectById(targetId) as StructureSpawn;
+        if (target === undefined) {
+            return;
+        }
+        if (memory.target === null) {
+            memory.target = target.id;
+            creep.say("⬆ Filling");
+        }
+        if (creep.transfer(target, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
             creep.moveTo(target, { visualizePathStyle: { stroke: "#ffffff" } });
         }
 
@@ -197,6 +223,11 @@ export class RoleWorker {
 
         if (memory.state === WorkerState.UPGRADING) {
             this.upgrading(creep, memory);
+            return;
+        }
+
+        if (memory.state === WorkerState.FILLING) {
+            this.filling(creep, memory);
             return;
         }
     }

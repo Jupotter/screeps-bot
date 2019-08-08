@@ -10,7 +10,7 @@ interface CreepMemory extends BaseCreepMemory {
 
 interface RoomMemory {
     spawn: string;
-    sources: SourceMemory[] | null;
+    sources: SourceMemory[];
 }
 
 interface SourceMemory {
