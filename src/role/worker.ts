@@ -8,7 +8,6 @@ enum WorkerState {
 }
 
 interface WorkerMemory extends CreepMemory {
-    building: boolean;
     state: WorkerState;
     target: string | null;
 }

@@ -18,7 +18,8 @@ export const loop = ErrorMapper.wrapLoop(() => {
     for (const roomName in Game.rooms) {
         const room = Game.rooms[roomName];
 
-        const spawn = room.find(FIND_MY_SPAWNS)[0];
+        RoomManager.SetupMemory(room);
+        const spawn = Game.getObjectById(room.memory.spawn) as StructureSpawn;
 
         const workers = _.filter(
             Game.creeps,
@@ -33,3 +34,17 @@ export const loop = ErrorMapper.wrapLoop(() => {
     }
     Utils.ClearMemory();
 });
+
+class RoomManager {
+    public static SetupMemory(room: Room) {
+        const memory = room.memory;
+        if (memory.sources === null) {
+            const sources = room.find(FIND_SOURCES);
+            const memories = sources.map(s => ({ id: s.id, creep: null } as SourceMemory));
+            memory.sources = memories;
+        }
+        if (memory.spawn === null) {
+            memory.spawn = room.find(FIND_MY_SPAWNS)[0].id;
+        }
+    }
+}

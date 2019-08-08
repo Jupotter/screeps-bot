@@ -8,14 +8,14 @@ interface CreepMemory extends BaseCreepMemory {
     role: string;
 }
 
-interface HarvesterMemory extends CreepMemory {
-    source: string;
-    harvest: boolean;
-    orig: string;
-}
-
 interface RoomMemory {
     spawn: string;
+    sources: SourceMemory[] | null;
+}
+
+interface SourceMemory {
+    id: string;
+    creep: string | null;
 }
 
 interface Memory {
