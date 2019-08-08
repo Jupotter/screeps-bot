@@ -37,14 +37,12 @@ export const loop = ErrorMapper.wrapLoop(() => {
 
 class RoomManager {
     public static SetupMemory(room: Room) {
-        const memory = room.memory;
-        if (memory.sources === null) {
+        if (room.memory.spawn === null || room.memory.spawn === undefined) {
+            room.memory = { spawn: room.find(FIND_MY_SPAWNS)[0].id, sources: null };
+
             const sources = room.find(FIND_SOURCES);
             const memories = sources.map(s => ({ id: s.id, creep: null } as SourceMemory));
-            memory.sources = memories;
-        }
-        if (memory.spawn === null) {
-            memory.spawn = room.find(FIND_MY_SPAWNS)[0].id;
+            room.memory.sources = memories;
         }
     }
 }
