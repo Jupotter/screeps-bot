@@ -196,6 +196,12 @@ export class RoleWorker {
             creep.moveTo(target, { visualizePathStyle: { stroke: "#ffffff" } });
         }
 
+        if (target.energy === 300) {
+            memory.state = WorkerState.UPGRADING;
+            memory.target = null;
+            this.upgrading(creep, memory);
+        }
+
         if (creep.carry.energy === 0) {
             memory.state = WorkerState.HARVESTING;
             memory.target = null;
