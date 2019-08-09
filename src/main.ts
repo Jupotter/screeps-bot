@@ -1,4 +1,5 @@
 import { InfoFlag } from "infoFlag";
+import { JobManager, JobType } from "JobManager";
 import { RoleHarvester } from "role/harvester";
 import { RoleWorker } from "role/worker";
 import { Utils } from "utils";
@@ -20,6 +21,7 @@ export const loop = ErrorMapper.wrapLoop(() => {
         const room = Game.rooms[roomName];
 
         RoomManager.SetupMemory(room);
+        JobManager.PrepareJobs(room);
         const spawn = Game.getObjectById(room.memory.spawn) as StructureSpawn;
 
         const workers = _.filter(
@@ -32,11 +34,13 @@ export const loop = ErrorMapper.wrapLoop(() => {
             creep => creep.memory.role === "harvester" && creep.memory.ownRoom === room.name
         );
 
+        const harvestJobs = room.memory.jobs.filter(j => j.type === JobType.Harvest);
+
         console.log(`workers: ${workers.length}/3`);
-        console.log(`harvesters: ${harvesters.length}/${room.memory.sources.length}`);
+        console.log(`harvesters: ${harvesters.length}/${harvestJobs.length}`);
 
         if (!spawn.spawning) {
-            if (harvesters.length < room.memory.sources.length) {
+            if (harvesters.length < 2) {
                 RoleHarvester.spawn(spawn, false, { ownRoom: room.name });
             } else if (workers.length < 3) {
                 RoleWorker.spawn(spawn, false, { ownRoom: room.name });
@@ -58,14 +62,12 @@ export const loop = ErrorMapper.wrapLoop(() => {
 class RoomManager {
     public static SetupMemory(room: Room) {
         if (room.memory.spawn === null || room.memory.spawn === undefined) {
-            const sources = room.find(FIND_SOURCES);
-            const memories = sources.map(s => ({ id: s.id, creep: null } as SourceMemory));
-            room.memory = { spawn: room.find(FIND_MY_SPAWNS)[0].id, sources: memories };
+            room.memory = { spawn: room.find(FIND_MY_SPAWNS)[0].id, jobs: [] };
         }
 
-        room.memory.sources.forEach(s => {
-            if (s.creep !== null && Memory.creeps[s.creep] === undefined) {
-                s.creep = null;
+        room.memory.jobs.forEach(j => {
+            if (j.creep !== null && Memory.creeps[j.creep] === undefined) {
+                j.creep = null;
             }
         });
     }

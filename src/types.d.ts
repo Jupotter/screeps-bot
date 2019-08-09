@@ -1,16 +1,26 @@
 // example declaration file - remove these and add your own custom typings
 
+interface Job {
+    pos: RoomPosition | null;
+    targetId: string;
+    priority: number;
+    type: JobType;
+    creep: string | null;
+    creepLimit: number;
+}
+
 interface BaseCreepMemory {
     ownRoom: string;
 }
 
 interface CreepMemory extends BaseCreepMemory {
     role: string;
+    job: Job | null;
 }
 
 interface RoomMemory {
     spawn: string;
-    sources: SourceMemory[];
+    jobs: Job[];
 }
 
 interface SourceMemory {

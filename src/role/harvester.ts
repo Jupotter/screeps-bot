@@ -1,5 +1,5 @@
+import { JobType } from "JobManager";
 import { Utils } from "utils";
-import { ErrorMapper } from "utils/ErrorMapper";
 
 enum State {
     SPAWNING,
@@ -8,7 +8,6 @@ enum State {
 
 interface HarvesterMemory extends CreepMemory {
     state: State;
-    source: string;
 }
 
 export class RoleHarvester {
@@ -17,23 +16,24 @@ export class RoleHarvester {
         const fullMemory = memory as HarvesterMemory;
         fullMemory.role = "harvester";
         fullMemory.state = State.SPAWNING;
+        fullMemory.job = null;
         console.log("Spawning harvester: " + Utils.BodyCost(body));
         console.log(spawn.spawnCreep(body, "harvester" + Game.time.toString(), { memory: fullMemory }));
         return body;
     }
 
     private static spawning(creep: Creep, memory: HarvesterMemory) {
-        if (memory.source === null || memory.source === undefined) {
+        if (memory.job === null || memory.job === undefined) {
             const roomMemory = Game.rooms[creep.memory.ownRoom].memory;
-            const sources = roomMemory.sources;
-            console.log(sources.length);
-            const free = sources.find(s => s.creep === null);
+            const jobs = roomMemory.jobs.filter(j => j.type === JobType.Harvest);
+
+            const free = jobs.find(j => j.creep === null);
             if (free === undefined) {
                 console.log("No source available, dying");
                 return;
             }
 
-            memory.source = free.id;
+            memory.job = free;
             free.creep = creep.name;
             creep.say("🔄 harvest");
             memory.state = State.HARVESTING;
@@ -43,10 +43,11 @@ export class RoleHarvester {
     }
 
     private static harvest(creep: Creep, memory: HarvesterMemory) {
-        const source = Game.getObjectById(memory.source) as Source;
-        if (source === undefined || source === null) {
-            console.log("No source available, dying");
+        if (memory.job === null) {
+            creep.say("No job available");
+            return;
         }
+        const source = Game.getObjectById(memory.job.targetId) as Source;
         if (creep.harvest(source) === ERR_NOT_IN_RANGE) {
             creep.moveTo(source, { visualizePathStyle: { stroke: "#ffaa00" } });
         }
