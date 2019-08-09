@@ -1,5 +1,3 @@
-// example declaration file - remove these and add your own custom typings
-
 interface Job {
     pos: RoomPosition | null;
     targetId: string;

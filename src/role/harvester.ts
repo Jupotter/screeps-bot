@@ -29,7 +29,7 @@ export class RoleHarvester {
 
             const free = jobs.find(j => j.creep === null);
             if (free === undefined) {
-                console.log("No source available, dying");
+                console.log("No source available");
                 return;
             }
 

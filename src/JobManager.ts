@@ -26,6 +26,20 @@ export class JobManager {
 
         roomMemory.jobs.push(...sourceJobs);
 
+        if (roomMemory.jobs.find(j => j.targetId === roomMemory.spawn) === undefined) {
+            const spawn = Game.getObjectById(roomMemory.spawn) as StructureSpawn;
+            if (spawn.energy < spawn.energyCapacity) {
+                roomMemory.jobs.push({
+                    creep: null,
+                    creepLimit: 1,
+                    pos: spawn.pos,
+                    priority: 1,
+                    targetId: spawn.id,
+                    type: JobType.Fill
+                });
+            }
+        }
+
         if (roomMemory.jobs.find(j => j.type === JobType.Upgrade) === undefined && room.controller !== undefined) {
             const controller = room.controller;
             roomMemory.jobs.push({
@@ -36,17 +50,21 @@ export class JobManager {
                 targetId: controller.id,
                 type: JobType.Upgrade
             });
-        }
-
-        if (roomMemory.jobs.find(j => j.targetId === roomMemory.spawn) === undefined) {
-            const spawn = Game.getObjectById(roomMemory.spawn) as StructureSpawn;
             roomMemory.jobs.push({
                 creep: null,
                 creepLimit: 1,
-                pos: spawn.pos,
-                priority: 1,
-                targetId: spawn.id,
-                type: JobType.Fill
+                pos: controller.pos,
+                priority: 2,
+                targetId: controller.id,
+                type: JobType.Upgrade
+            });
+            roomMemory.jobs.push({
+                creep: null,
+                creepLimit: 1,
+                pos: controller.pos,
+                priority: 2,
+                targetId: controller.id,
+                type: JobType.Upgrade
             });
         }
 

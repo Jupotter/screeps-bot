@@ -1,11 +1,11 @@
+import { JobType } from "JobManager";
 import { Utils } from "utils";
 
 enum WorkerState {
-    SPAWNING,
-    HARVESTING,
-    BUILDING,
-    UPGRADING,
-    FILLING
+    Spawning,
+    Harvesting,
+    Working,
+    FindingJob
 }
 
 interface WorkerMemory extends CreepMemory {
@@ -28,11 +28,14 @@ export class RoleWorker {
         STRUCTURE_WALL
     ];
 
+    private static allowedJobs = [JobType.Build, JobType.Upgrade, JobType.Fill];
+
     public static spawn(spawn: StructureSpawn, force = false, memory: BaseCreepMemory) {
         const body = Utils.BuildBody(spawn, [WORK, CARRY, MOVE], null, 20);
         const fullMemory = memory as WorkerMemory;
         fullMemory.role = "worker";
-        fullMemory.state = WorkerState.SPAWNING;
+        fullMemory.state = WorkerState.Spawning;
+        fullMemory.target = null;
         console.log("Spawning worker");
         spawn.spawnCreep(body, "worker" + Game.time.toString(), { memory: fullMemory });
         return body;
@@ -40,11 +43,27 @@ export class RoleWorker {
 
     private static spawning(creep: Creep, memory: WorkerMemory) {
         if (!creep.spawning) {
-            creep.say("🔄 harvest");
-            memory.state = WorkerState.HARVESTING;
+            creep.say("🔄 FindingJob");
+            memory.state = WorkerState.FindingJob;
             this.run(creep);
         }
         return;
+    }
+
+    private static findJob(creep: Creep, memory: WorkerMemory) {
+        const jobs = Memory.rooms[memory.ownRoom].jobs;
+        const free = jobs
+            .filter(j => j.creep === null && this.allowedJobs.includes(j.type))
+            .sort((j1, j2) => j1.priority - j2.priority)[0];
+        if (free === undefined) {
+            creep.say("No job available");
+            return;
+        }
+
+        free.creep = creep.name;
+        memory.job = free;
+        memory.state = WorkerState.Working;
+        this.working(creep, memory);
     }
 
     private static findHarvestingTarget(creep: Creep, memory: WorkerMemory) {
@@ -86,7 +105,7 @@ export class RoleWorker {
     }
 
     private static harvesting(creep: Creep, memory: WorkerMemory) {
-        if (memory.target === null) {
+        if (memory.target === null || memory.target === undefined) {
             this.findHarvestingTarget(creep, memory);
         }
 
@@ -115,30 +134,28 @@ export class RoleWorker {
 
         if (creep.carry.energy === creep.carryCapacity) {
             memory.target = null;
-            memory.state = WorkerState.BUILDING;
+            memory.state = WorkerState.Working;
         }
     }
 
-    private static findBuildingTarget(creep: Creep, memory: WorkerMemory) {
-        creep.say("🚧 build");
-
-        for (const i in this.order) {
-            const struct = this.order[i];
-            const target = creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES, {
-                filter: a => {
-                    return a.structureType === struct;
-                }
-            });
-            if (target) {
-                memory.target = target.id;
+    private static working(creep: Creep, memory: WorkerMemory) {
+        if (memory.job === null) {
+            memory.state = WorkerState.FindingJob;
+            this.findJob(creep, memory);
+            if (memory.job === null) {
                 return;
             }
         }
-    }
 
-    private static building(creep: Creep, memory: WorkerMemory) {
+        if (creep.carry.energy === 0) {
+            memory.state = WorkerState.Harvesting;
+            memory.target = null;
+            this.harvesting(creep, memory);
+            return;
+        }
+
         if (memory.target === null) {
-            this.findBuildingTarget(creep, memory);
+            memory.target = memory.job.targetId;
         }
 
         const target = Game.getObjectById(memory.target as string);
@@ -147,93 +164,66 @@ export class RoleWorker {
             if (creep.build(target) === ERR_NOT_IN_RANGE) {
                 creep.moveTo(target, { visualizePathStyle: { stroke: "#ffffff" } });
             }
+
+            if (target.progress === target.progressTotal) {
+                const jobs = Memory.rooms[memory.ownRoom].jobs;
+                const index = jobs.findIndex(j => j.targetId === memory.target);
+                if (index > -1) {
+                    jobs.splice(index, 1);
+                }
+                memory.job = null;
+                memory.target = null;
+            }
+        } else if (target instanceof StructureSpawn) {
+            if (creep.transfer(target, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
+                creep.moveTo(target, { visualizePathStyle: { stroke: "#ffffff" } });
+            }
+
+            if (target.energy === target.energyCapacity) {
+                const jobs = Memory.rooms[memory.ownRoom].jobs;
+                const index = jobs.findIndex(j => j.targetId === memory.target);
+                if (index > -1) {
+                    jobs.splice(index, 1);
+                }
+                memory.job = null;
+                memory.target = null;
+            }
+        } else if (target instanceof StructureController) {
+            if (creep.upgradeController(target) === ERR_NOT_IN_RANGE) {
+                creep.moveTo(target, { visualizePathStyle: { stroke: "#ffffff" } });
+            }
         } else {
-            memory.state = WorkerState.FILLING;
-            this.filling(creep, memory);
+            const jobs = Memory.rooms[memory.ownRoom].jobs;
+            const job = jobs.find(j => j.targetId === memory.target);
+            if (job !== undefined) {
+                job.creep = null;
+            }
+            memory.job.creep = null;
+            memory.job = null;
             return;
-        }
-
-        if (creep.carry.energy === 0) {
-            memory.state = WorkerState.HARVESTING;
-            memory.target = null;
-            this.harvesting(creep, memory);
-        }
-    }
-
-    private static upgrading(creep: Creep, memory: WorkerMemory) {
-        const target = creep.room.controller;
-
-        if (target === undefined) {
-            return;
-        }
-        if (memory.target === null) {
-            memory.target = target.id;
-            creep.say("⬆ Upgrade");
-        }
-        if (creep.upgradeController(target) === ERR_NOT_IN_RANGE) {
-            creep.moveTo(target, { visualizePathStyle: { stroke: "#ffffff" } });
-        }
-
-        if (creep.carry.energy === 0) {
-            memory.state = WorkerState.HARVESTING;
-            memory.target = null;
-            this.harvesting(creep, memory);
-        }
-    }
-
-    private static filling(creep: Creep, memory: WorkerMemory) {
-        const targetId = Memory.rooms[memory.ownRoom].spawn;
-
-        const target = Game.getObjectById(targetId) as StructureSpawn;
-        if (target === undefined) {
-            return;
-        }
-        if (memory.target === null) {
-            memory.target = target.id;
-            creep.say("⬆ Filling");
-        }
-        if (creep.transfer(target, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-            creep.moveTo(target, { visualizePathStyle: { stroke: "#ffffff" } });
-        }
-
-        if (target.energy === 300) {
-            memory.state = WorkerState.UPGRADING;
-            memory.target = null;
-            this.upgrading(creep, memory);
-        }
-
-        if (creep.carry.energy === 0) {
-            memory.state = WorkerState.HARVESTING;
-            memory.target = null;
-            this.harvesting(creep, memory);
         }
     }
 
     public static run(creep: Creep) {
         const memory = creep.memory as WorkerMemory;
 
-        if (memory.state === WorkerState.SPAWNING) {
+        if (memory.state === WorkerState.Spawning) {
             this.spawning(creep, memory);
             return;
         }
 
-        if (memory.state === WorkerState.HARVESTING) {
+        if (memory.state === WorkerState.FindingJob) {
+            this.findJob(creep, memory);
+            return;
+        }
+
+        if (memory.state === WorkerState.Harvesting) {
             this.harvesting(creep, memory);
             return;
         }
 
-        if (memory.state === WorkerState.BUILDING) {
-            this.building(creep, memory);
-            return;
-        }
-
-        if (memory.state === WorkerState.UPGRADING) {
-            this.upgrading(creep, memory);
-            return;
-        }
-
-        if (memory.state === WorkerState.FILLING) {
-            this.filling(creep, memory);
+        if (memory.state === WorkerState.Working) {
+            this.working(creep, memory);
             return;
         }
     }

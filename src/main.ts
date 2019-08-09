@@ -35,15 +35,19 @@ export const loop = ErrorMapper.wrapLoop(() => {
         );
 
         const harvestJobs = room.memory.jobs.filter(j => j.type === JobType.Harvest);
+        const workJob = room.memory.jobs.filter(j => j.type !== JobType.Harvest && j.creep === null);
+        const workerNeeded = Math.floor(
+            workJob.filter(j => j.priority === 1).length + (workJob.filter(j => j.priority === 2).length + 2) / 3
+        );
 
-        console.log(`workers: ${workers.length}/3`);
+        console.log(`workers: ${workers.length}/${workers.length + workerNeeded}`);
         console.log(`harvesters: ${harvesters.length}/${harvestJobs.length}`);
 
         if (!spawn.spawning) {
-            if (harvesters.length < 2) {
-                RoleHarvester.spawn(spawn, false, { ownRoom: room.name });
-            } else if (workers.length < 3) {
+            if (workerNeeded !== 0) {
                 RoleWorker.spawn(spawn, false, { ownRoom: room.name });
+            } else if (harvesters.length < 2) {
+                RoleHarvester.spawn(spawn, false, { ownRoom: room.name });
             }
         } else {
             const spawned = Game.creeps[spawn.spawning.name];
