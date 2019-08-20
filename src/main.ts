@@ -36,9 +36,14 @@ export const loop = ErrorMapper.wrapLoop(() => {
 
         const harvestJobs = room.memory.jobs.filter(j => j.type === JobType.Harvest);
         const workJob = room.memory.jobs.filter(j => j.type !== JobType.Harvest && j.creep === null);
-        const workerNeeded = Math.floor(
-            workJob.filter(j => j.priority === 1).length + (workJob.filter(j => j.priority === 2).length + 2) / 3
-        );
+        // const workerNeeded = Math.floor(
+        //     workJob.filter(j => j.priority === 1).length + (workJob.filter(j => j.priority === 2).length + 2) / 3
+        // );
+
+        const workerNeeded = workJob
+            .map(j => j.priority)
+            .map(p => 1 / p)
+            .reduce((p, c) => p + c);
 
         console.log(`workers: ${workers.length}/${workers.length + workerNeeded}`);
         console.log(`harvesters: ${harvesters.length}/${harvestJobs.length}`);
